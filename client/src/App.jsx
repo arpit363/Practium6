@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import CodeEditor from './components/CodeEditor/CodeEditor';
 import './App.css';
 
 function App() {
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState('// Type or paste your code here...\n');
   const [language, setLanguage] = useState('javascript');
   const [explanation, setExplanation] = useState('');
   const [loading, setLoading] = useState(false);
@@ -101,13 +102,13 @@ function App() {
             </button>
           </div>
           
-          <textarea
-            className="code-input"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="Paste your code here..."
-            spellCheck="false"
-          />
+          <div className="editor-wrapper">
+            <CodeEditor
+              language={language}
+              value={code}
+              onChange={setCode}
+            />
+          </div>
         </div>
 
         <div className="chat-panel">
