@@ -4,8 +4,11 @@ import dotenv from 'dotenv';
 
 import aiRoutes from './routes/aiRoutes.js';
 import codeRoutes from './routes/codeRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+import connectDB from './config/db.js';
 
 dotenv.config();
+connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -15,6 +18,7 @@ app.use(cors());
 app.use(express.json());
 
 // ── Routes ──
+app.use('/api/auth', authRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/code', codeRoutes);
 
