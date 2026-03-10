@@ -2,7 +2,7 @@ import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import CodeEditor from '../components/CodeEditor/CodeEditor';
 import OutputPanel from '../components/OutputPanel/OutputPanel';
-import { streamExplainCode, runCode } from '../services/api';
+import { streamExplainCode, streamAnalyzeComplexity, runCode } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { LogOut } from 'lucide-react';
 import '../App.css';
@@ -11,7 +11,9 @@ function Workspace() {
   const [code, setCode] = useState('// Type or paste your code here...\n');
   const [language, setLanguage] = useState('javascript');
   const [explanation, setExplanation] = useState('');
+  const [complexity, setComplexity] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingComplexity, setLoadingComplexity] = useState(false);
 
   // Code execution state
   const [output, setOutput] = useState(null);
@@ -34,6 +36,22 @@ function Workspace() {
     });
 
     setLoading(false);
+  };
+
+  const handleAnalyzeComplexity = async () => {
+    if (!code.trim()) return;
+
+    setLoadingComplexity(true);
+    setComplexity('');
+
+    await streamAnalyzeComplexity({
+      code,
+      language,
+      onChunk: (text) => setComplexity((prev) => prev + text),
+      onError: () => setComplexity('Error: Could not generate complexity analysis.'),
+    });
+
+    setLoadingComplexity(false);
   };
 
   const handleRun = async () => {
@@ -108,6 +126,14 @@ function Workspace() {
                 >
                   {loading ? 'Thinking...' : 'Explain Code'}
                 </button>
+                <button
+                  onClick={handleAnalyzeComplexity}
+                  disabled={loadingComplexity || !code.trim()}
+                  className="explain-btn"
+                  style={{ marginLeft: '10px' }}
+                >
+                  {loadingComplexity ? 'Analyzing...' : 'Analyze Complexity'}
+                </button>
               </div>
             </div>
 
@@ -129,13 +155,22 @@ function Workspace() {
           )}
         </div>
 
-        <div className="chat-panel">
+        <div className="chat-panel" style={{ overflowY: 'auto' }}>
           <h2>Explanation</h2>
-          <div className="markdown-container">
+          <div className="markdown-container" style={{ marginBottom: '1rem' }}>
             {explanation ? (
               <ReactMarkdown>{explanation}</ReactMarkdown>
             ) : (
               <p className="placeholder">Ask Apollo to explain your code.</p>
+            )}
+          </div>
+          
+          <h2>Complexity Analysis</h2>
+          <div className="markdown-container">
+            {complexity ? (
+              <ReactMarkdown>{complexity}</ReactMarkdown>
+            ) : (
+              <p className="placeholder">Ask Apollo to analyze the time and space complexity.</p>
             )}
           </div>
         </div>
