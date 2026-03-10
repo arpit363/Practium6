@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import CodeEditor from './components/CodeEditor/CodeEditor';
+import OutputPanel from './components/OutputPanel/OutputPanel';
+import { streamExplainCode, runCode } from './services/api';
 import './App.css';
 
 function App() {
@@ -9,68 +11,41 @@ function App() {
   const [explanation, setExplanation] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Code execution state
+  const [output, setOutput] = useState(null);
+  const [running, setRunning] = useState(false);
+  const [outputOpen, setOutputOpen] = useState(false);
+
   const handleExplain = async () => {
     if (!code.trim()) return;
-    
+
     setLoading(true);
-    setExplanation(''); // Clear previous explanation
+    setExplanation('');
+
+    await streamExplainCode({
+      code,
+      language,
+      onChunk: (text) => setExplanation((prev) => prev + text),
+      onError: () => setExplanation('Error: Could not generate explanation.'),
+    });
+
+    setLoading(false);
+  };
+
+  const handleRun = async () => {
+    if (!code.trim()) return;
+
+    setRunning(true);
+    setOutput(null);
+    setOutputOpen(true);
 
     try {
-      // Connect to our streaming backend
-      const response = await fetch('http://localhost:5000/api/ai/explain', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ code, language }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch explanation');
-      }
-
-      // Read the stream
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf-8');
-      let done = false;
-
-      while (!done) {
-        const { value, done: readerDone } = await reader.read();
-        done = readerDone;
-
-        if (value) {
-          const chunk = decoder.decode(value, { stream: true });
-          
-          // The server sends SSE formatted chunks like: "data: {\"text\":\"Hello\"}\n\n"
-          // We need to parse them
-          const lines = chunk.split('\n');
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const dataStr = line.replace('data: ', '').trim();
-              
-              if (dataStr === '[DONE]') {
-                done = true;
-                break;
-              }
-
-              if (dataStr) {
-                try {
-                  const dataObj = JSON.parse(dataStr);
-                  // Append the new text token to our existing explanation state
-                  setExplanation((prev) => prev + dataObj.text);
-                } catch (e) {
-                  console.error('Error parsing stream chunk', dataStr);
-                }
-              }
-            }
-          }
-        }
-      }
+      const result = await runCode({ code, language });
+      setOutput(result);
     } catch (error) {
-      console.error(error);
-      setExplanation('Error: Could not generate explanation.');
+      setOutput({ stdout: '', stderr: error.message, exitCode: 1 });
     } finally {
-      setLoading(false);
+      setRunning(false);
     }
   };
 
@@ -82,33 +57,52 @@ function App() {
       </header>
 
       <div className="workspace">
-        <div className="editor-panel">
-          <div className="controls">
-            <select 
-              value={language} 
-              onChange={(e) => setLanguage(e.target.value)}
-            >
-              <option value="javascript">JavaScript</option>
-              <option value="python">Python</option>
-              <option value="java">Java</option>
-              <option value="cpp">C++</option>
-            </select>
-            <button 
-              onClick={handleExplain} 
-              disabled={loading || !code.trim()}
-              className="explain-btn"
-            >
-              {loading ? 'Thinking...' : 'Explain Code'}
-            </button>
+        <div className="editor-section">
+          <div className="editor-panel">
+            <div className="controls">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+              >
+                <option value="javascript">JavaScript</option>
+                <option value="python">Python</option>
+                <option value="java">Java</option>
+                <option value="cpp">C++</option>
+              </select>
+              <div className="controls-right">
+                <button
+                  onClick={handleRun}
+                  disabled={running || !code.trim()}
+                  className="run-btn"
+                >
+                  {running ? '⏳ Running...' : '▶ Run Code'}
+                </button>
+                <button
+                  onClick={handleExplain}
+                  disabled={loading || !code.trim()}
+                  className="explain-btn"
+                >
+                  {loading ? 'Thinking...' : 'Explain Code'}
+                </button>
+              </div>
+            </div>
+
+            <div className="editor-wrapper">
+              <CodeEditor
+                language={language}
+                value={code}
+                onChange={setCode}
+              />
+            </div>
           </div>
-          
-          <div className="editor-wrapper">
-            <CodeEditor
-              language={language}
-              value={code}
-              onChange={setCode}
+
+          {outputOpen && (
+            <OutputPanel
+              output={output}
+              running={running}
+              onClose={() => setOutputOpen(false)}
             />
-          </div>
+          )}
         </div>
 
         <div className="chat-panel">

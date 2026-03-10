@@ -8,6 +8,9 @@
   --border-color: #30363d;
   --brand-color: #58a6ff;
   --brand-hover: #3182ce;
+  --green: #3fb950;
+  --green-hover: #2ea043;
+  --red: #f85149;
 }
 
 body {
@@ -45,9 +48,18 @@ header p {
   font-size: 0.9rem;
 }
 
+/* ── Workspace Layout ── */
 .workspace {
   display: flex;
   flex: 1;
+  overflow: hidden;
+}
+
+.editor-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-color);
   overflow: hidden;
 }
 
@@ -55,10 +67,11 @@ header p {
   flex: 1;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--border-color);
   background-color: var(--panel-bg);
+  min-height: 0;
 }
 
+/* ── Controls Bar ── */
 .controls {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--border-color);
@@ -66,6 +79,11 @@ header p {
   justify-content: space-between;
   align-items: center;
   background-color: #010409;
+}
+
+.controls-right {
+  display: flex;
+  gap: 0.5rem;
 }
 
 select {
@@ -77,6 +95,27 @@ select {
   font-family: 'Inter';
 }
 
+.run-btn {
+  background-color: var(--green);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter';
+}
+
+.run-btn:hover:not(:disabled) {
+  background-color: var(--green-hover);
+}
+
+.run-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .explain-btn {
   background-color: var(--brand-color);
   color: #000;
@@ -86,6 +125,7 @@ select {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: 'Inter';
 }
 
 .explain-btn:hover:not(:disabled) {
@@ -103,6 +143,7 @@ select {
   overflow: hidden;
 }
 
+/* ── Chat Panel ── */
 .chat-panel {
   flex: 1;
   display: flex;

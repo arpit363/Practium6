@@ -1,0 +1,90 @@
+/* ── Bottom Output Panel (Terminal Drawer) ── */
+.output-panel {
+  height: 200px;
+  min-height: 120px;
+  background-color: #010409;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: 200px;
+    opacity: 1;
+  }
+}
+
+.output-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.output-header span {
+  color: var(--green);
+}
+
+.output-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  line-height: 1;
+}
+
+.output-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.output-content {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  overflow-y: auto;
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.output-stdout {
+  color: var(--text-primary);
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.output-stderr {
+  color: var(--red);
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.output-running {
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.output-empty {
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
