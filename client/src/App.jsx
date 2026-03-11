@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import LandingV2 from './pages/LandingV2';
 import Auth from './pages/Auth';
 import Workspace from './pages/Workspace';
 
@@ -18,16 +19,16 @@ function AppRoutes() {
     <>
       <Toaster position="top-right" toastOptions={{ style: { background: '#1e1e24', color: '#fff' } }} />
       <Routes>
+        <Route path="/" element={<LandingV2 />} />
         <Route path="/auth" element={user ? <Navigate to="/workspace" /> : <Auth />} />
-        <Route 
-          path="/workspace" 
+        <Route
+          path="/workspace"
           element={
             <ProtectedRoute>
               <Workspace />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route path="/" element={<Navigate to={user ? "/workspace" : "/auth"} />} />
       </Routes>
     </>
   );
