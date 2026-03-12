@@ -69,7 +69,7 @@ const Auth = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <h1>Apollo 🚀</h1>
+          <h1>Apollo</h1>
           <p>{showOtp ? 'Verify Your Account' : isLogin ? 'Welcome Back' : 'Join Apollo'}</p>
         </div>
 

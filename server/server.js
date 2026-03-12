@@ -29,5 +29,5 @@ app.get('/health', (req, res) => {
 
 // ── Start Server ──
 app.listen(PORT, () => {
-  console.log(`🚀 Apollo server running on port ${PORT}`);
+  console.log(`Apollo server running on port ${PORT}`);
 });

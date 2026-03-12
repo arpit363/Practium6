@@ -75,7 +75,7 @@ function Workspace() {
     <div className="container">
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1>Apollo 🚀</h1>
+          <h1>Apollo</h1>
           <p>Your AI Coding Coach - Workspace</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -117,7 +117,7 @@ function Workspace() {
                   disabled={running || !code.trim()}
                   className="run-btn"
                 >
-                  {running ? '⏳ Running...' : '▶ Run Code'}
+                  {running ? 'Running...' : 'Run Code'}
                 </button>
                 <button
                   onClick={handleExplain}

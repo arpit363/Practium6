@@ -220,7 +220,7 @@ function Testimonial() {
         <section className="lv2-section-full">
             <div className="lv2-testimonial-card lv2-animate">
                 <div className="lv2-testimonial-text">
-                    <div className="lv2-testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <div className="lv2-testi-stars"></div>
                     <p className="lv2-testi-quote">
                         "Apollo completely changed how I prepare for interviews. The Socratic
                         mode forces me to think through problems instead of copy-pasting solutions.
@@ -341,7 +341,7 @@ function BenefitsSection() {
                 {/* Left: Testimonial card */}
                 <div className="lv2-testimonial-card" style={{ gridTemplateColumns: '1fr', maxWidth: 'none' }}>
                     <div className="lv2-testimonial-text">
-                        <div className="lv2-testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                        <div className="lv2-testi-stars"></div>
                         <p className="lv2-testi-quote">
                             "The Roast My Code mode is hilarious but genuinely useful. It caught three
                             performance issues that I missed in my PR review. The streaming makes it feel
