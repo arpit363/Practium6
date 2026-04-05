@@ -245,3 +245,59 @@ export async function streamRoastCode({ code, language, onChunk, onDone, onError
     onError?.(error);
   }
 }
+
+/**
+ * Streams an AI code review via SSE.
+ */
+export async function streamReviewCode({ code, language, onChunk, onDone, onError }) {
+  try {
+    const response = await fetch(`${API_BASE}/api/ai/review`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, language }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch review analysis');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let done = false;
+
+    while (!done) {
+      const { value, done: readerDone } = await reader.read();
+      done = readerDone;
+
+      if (value) {
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataStr = line.replace('data: ', '').trim();
+
+            if (dataStr === '[DONE]') {
+              done = true;
+              break;
+            }
+
+            if (dataStr) {
+              try {
+                const dataObj = JSON.parse(dataStr);
+                onChunk(dataObj.text);
+              } catch (e) {
+                console.error('Error parsing stream chunk', dataStr);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    onDone?.();
+  } catch (error) {
+    console.error(error);
+    onError?.(error);
+  }
+}

@@ -28,6 +28,33 @@ export async function* streamRoastCode(code, language) {
 }
 
 /**
+ * Streams an AI code review of the given code.
+ */
+export async function* streamCodeReview(code, language) {
+  const prompt = `
+    You are Apollo, a highly analytical, strict, and brilliant principal engineer.
+    Carefully review the following ${language || 'programming'} code snippet. Identify any bugs, anti-patterns, missing edge-cases, and violations of clean code / SOLID principles.
+    Explain the issues fundamentally and provide direct snippets of the refactored code.
+    Format your response beautifully in Markdown.
+
+    Code to review:
+    \`\`\`${language || ''}
+    ${code}
+    \`\`\`
+  `;
+
+  const responseStream = await ai.models.generateContentStream({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+  });
+
+  for await (const chunk of responseStream) {
+    yield chunk.text;
+  }
+}
+
+
+/**
  * Streams an AI explanation of the given code.
  * Yields text chunks as they arrive from Gemini.
  */

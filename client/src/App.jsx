@@ -5,6 +5,7 @@ import LandingV2 from './pages/LandingV2';
 import Auth from './pages/Auth';
 import Workspace from './pages/Workspace';
 import Roast from './pages/Roast';
+import Review from './pages/Review';
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
@@ -35,6 +36,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <Roast />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/code-review"
+          element={
+            <ProtectedRoute>
+              <Review />
             </ProtectedRoute>
           }
         />
