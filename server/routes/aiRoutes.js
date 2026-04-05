@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { explainCode, analyzeComplexity } from '../controllers/chatController.js';
+import { explainCode, analyzeComplexity, generateTests } from '../controllers/chatController.js';
 
 const router = Router();
 
@@ -8,5 +8,8 @@ router.post('/explain', explainCode);
 
 // POST /api/ai/complexity — Stream AI time & space complexity analysis
 router.post('/complexity', analyzeComplexity);
+
+// POST /api/ai/generate-tests — Stream AI generated tests
+router.post('/generate-tests', generateTests);
 
 export default router;

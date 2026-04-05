@@ -115,6 +115,23 @@ export async function streamAnalyzeComplexity({ code, language, onChunk, onDone,
 }
 
 /**
+ * Fetches AI generated tests as a JSON array.
+ */
+export async function fetchGeneratedTests({ code, language }) {
+  const response = await fetch(`${API_BASE}/api/ai/generate-tests`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code, language }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch generated tests');
+  }
+
+  return response.json();
+}
+
+/**
  * Executes code via the backend Piston proxy.
  * Returns { stdout, stderr, exitCode }.
  */
