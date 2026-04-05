@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { explainCode, analyzeComplexity, generateTests, roastCode } from '../controllers/chatController.js';
+import { explainCode, analyzeComplexity, generateTests, roastCode, reviewCode } from '../controllers/chatController.js';
 
 const router = Router();
 
@@ -14,5 +14,8 @@ router.post('/generate-tests', generateTests);
 
 // POST /api/ai/roast — Stream AI code roast
 router.post('/roast', roastCode);
+
+// POST /api/ai/review — Stream AI code review
+router.post('/review', reviewCode);
 
 export default router;

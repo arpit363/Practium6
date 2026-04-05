@@ -60,6 +60,8 @@ function Workspace() {
     setLoadingComplexity(false);
   };
 
+  // Review Code moved to /code-review
+
   const handleGenerateTests = async () => {
     if (!code.trim()) return;
 
@@ -137,6 +139,12 @@ function Workspace() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <button 
+            onClick={() => navigate('/code-review')} 
+            style={{ background: 'linear-gradient(45deg, #4b73ff, #00d2ff)', color: '#fff', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            🔍 Code Review
+          </button>
+          <button 
             onClick={() => navigate('/roast')} 
             style={{ background: 'linear-gradient(45deg, #ff4b4b, #ff8f00)', color: '#fff', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
           >
@@ -197,6 +205,7 @@ function Workspace() {
                 >
                   {loadingComplexity ? 'Analyzing...' : 'Analyze Complexity'}
                 </button>
+                {/* Review Code button removed */}
                 <button
                   onClick={handleGenerateTests}
                   disabled={loadingTests || !code.trim()}
