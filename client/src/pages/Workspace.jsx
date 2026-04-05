@@ -2,7 +2,7 @@ import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import CodeEditor from '../components/CodeEditor/CodeEditor';
 import OutputPanel from '../components/OutputPanel/OutputPanel';
-import { streamExplainCode, streamAnalyzeComplexity, runCode } from '../services/api';
+import { streamExplainCode, streamAnalyzeComplexity, fetchGeneratedTests, runCode } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { LogOut } from 'lucide-react';
 import '../App.css';
@@ -14,6 +14,10 @@ function Workspace() {
   const [complexity, setComplexity] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingComplexity, setLoadingComplexity] = useState(false);
+  const [testCases, setTestCases] = useState([]);
+  const [loadingTests, setLoadingTests] = useState(false);
+  const [runningTests, setRunningTests] = useState(false);
+  const [activeTab, setActiveTab] = useState('testcase'); // 'testcase' | 'testresult'
 
   // Code execution state
   const [output, setOutput] = useState(null);
@@ -52,6 +56,57 @@ function Workspace() {
     });
 
     setLoadingComplexity(false);
+  };
+
+  const handleGenerateTests = async () => {
+    if (!code.trim()) return;
+
+    setLoadingTests(true);
+    setTestCases([]);
+
+    try {
+      const generated = await fetchGeneratedTests({ code, language });
+      const initializedCases = generated.map(tc => ({
+        ...tc,
+        status: 'pending',
+        actualOutput: null
+      }));
+      setTestCases(initializedCases);
+      setActiveTab('testcase');
+    } catch (e) {
+      console.error('Error fetching generated tests:', e);
+      setTestCases([{ inputs: 'Error', expectedOutput: '', callCode: '', status: 'failed', actualOutput: 'Could not generate tests' }]);
+    }
+
+    setLoadingTests(false);
+  };
+
+  const handleRunTests = async () => {
+    if (!testCases.length || !code.trim()) return;
+
+    setRunningTests(true);
+    const results = [...testCases];
+
+    for (let i = 0; i < results.length; i++) {
+        const tc = results[i];
+        const runCodePayload = tc.fullExecutableCode || `${code}\n\n${tc.callCode}`;
+        try {
+            const res = await runCode({ code: runCodePayload, language });
+            results[i].actualOutput = res.stdout.trim();
+            results[i].status = res.stdout.trim() === tc.expectedOutput.trim() ? 'passed' : 'failed';
+        } catch (e) {
+            results[i].actualOutput = e.message;
+            results[i].status = 'error';
+        }
+        // Stagger requests to avoid rate-limiting on Judge0's public API
+        if (i < results.length - 1) {
+            await new Promise(r => setTimeout(r, 1500));
+        }
+    }
+    
+    setTestCases(results);
+    setActiveTab('testresult');
+    setRunningTests(false);
   };
 
   const handleRun = async () => {
@@ -134,16 +189,75 @@ function Workspace() {
                 >
                   {loadingComplexity ? 'Analyzing...' : 'Analyze Complexity'}
                 </button>
+                <button
+                  onClick={handleGenerateTests}
+                  disabled={loadingTests || !code.trim()}
+                  className="explain-btn"
+                  style={{ marginLeft: '10px' }}
+                >
+                  {loadingTests ? 'Generating...' : 'Generate Tests'}
+                </button>
               </div>
             </div>
 
-            <div className="editor-wrapper">
+            <div className="editor-wrapper" style={{ flex: 1, borderBottom: testCases.length > 0 ? '1px solid var(--border-color)' : 'none' }}>
               <CodeEditor
                 language={language}
                 value={code}
                 onChange={setCode}
               />
             </div>
+            
+            {testCases.length > 0 && (
+              <div className="test-console">
+                <div className="test-tabs">
+                  <button 
+                    className={`test-tab ${activeTab === 'testcase' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('testcase')}
+                  >
+                    Testcases
+                  </button>
+                  <button 
+                    className={`test-tab ${activeTab === 'testresult' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('testresult')}
+                  >
+                    Test Result
+                  </button>
+                  <button 
+                    className="test-run-btn"
+                    onClick={handleRunTests}
+                    disabled={runningTests}
+                  >
+                    {runningTests ? 'Running...' : 'Run Test Cases'}
+                  </button>
+                </div>
+                <div className="test-content">
+                  {testCases.map((tc, index) => (
+                    <div key={index} className="test-case-card">
+                      <h4 className="test-case-title">Test Case {index + 1}
+                         {activeTab === 'testresult' && tc.status !== 'pending' && (
+                           <span className={`status-badge ${tc.status}`}>{tc.status}</span>
+                         )}
+                      </h4>
+                      <div className="test-field">
+                        <strong>Input:</strong>
+                        <pre>{tc.inputs}</pre>
+                      </div>
+                      <div className="test-field">
+                        <strong>Expected Output:</strong>
+                        <pre>{tc.expectedOutput}</pre>
+                      </div>
+                      {activeTab === 'testresult' && tc.actualOutput !== null && (
+                        <div className="test-field">
+                          <strong>Your Output:</strong>
+                          <pre>{tc.actualOutput || 'N/A'}</pre>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {outputOpen && (
@@ -166,7 +280,7 @@ function Workspace() {
           </div>
           
           <h2>Complexity Analysis</h2>
-          <div className="markdown-container">
+          <div className="markdown-container" style={{ marginBottom: '1rem' }}>
             {complexity ? (
               <ReactMarkdown>{complexity}</ReactMarkdown>
             ) : (

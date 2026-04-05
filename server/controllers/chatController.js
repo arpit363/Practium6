@@ -1,4 +1,4 @@
-import { streamExplanation, streamComplexity } from '../services/aiService.js';
+import { streamExplanation, streamComplexity, generateTestsAsJson } from '../services/aiService.js';
 
 /**
  * POST /api/ai/explain
@@ -65,5 +65,25 @@ export async function analyzeComplexity(req, res) {
       res.write(`data: ${JSON.stringify({ error: 'Stream interrupted' })}\n\n`);
       res.end();
     }
+  }
+}
+
+/**
+ * POST /api/ai/generate-tests
+ * Returns AI-generated unit tests as JSON.
+ */
+export async function generateTests(req, res) {
+  const { code, language } = req.body;
+
+  if (!code) {
+    return res.status(400).json({ error: 'Code is required' });
+  }
+
+  try {
+    const tests = await generateTestsAsJson(code, language);
+    res.json(tests);
+  } catch (error) {
+    console.error('Error in generateTests:', error);
+    res.status(500).json({ error: 'Failed to generate tests', details: error.message });
   }
 }

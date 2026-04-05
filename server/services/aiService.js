@@ -53,3 +53,37 @@ export async function* streamComplexity(code, language) {
     yield chunk.text;
   }
 }
+
+/**
+ * Generates AI test cases as JSON.
+ * Returns an array of test case objects.
+ */
+export async function generateTestsAsJson(code, language) {
+  const prompt = `
+    You are Apollo, an expert QA engineer and coding tutor.
+    Analyze the following ${language || 'programming'} code and return a JSON array containing exactly 3 test cases.
+    
+    Each object must have:
+    - "inputs": A string describing the inputs visually (e.g. "a = 1, b = 2")
+    - "expectedOutput": A string of the EXACT expected printed output without quotes.
+    - "fullExecutableCode": A complete, runnable source code file as a single string. It MUST include all standard imports/includes (e.g., #include <iostream>, import java.util.*), the user's FULL original code block intact, and the main driver loop (e.g., int main(), public static void main) that calls the function with the test case arguments and prints the expected output. This allows the backend to securely natively compile the string as a complete program snippet.
+
+    Code to test:
+    \`\`\`${language || ''}
+    ${code}
+    \`\`\`
+  `;
+
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+    generationConfig: {
+      responseMimeType: "application/json"
+    }
+  });
+
+  let rawText = response.text || '';
+  rawText = rawText.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
+
+  return JSON.parse(rawText);
+}
