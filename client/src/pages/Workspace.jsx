@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useNavigate } from 'react-router-dom';
 import CodeEditor from '../components/CodeEditor/CodeEditor';
 import OutputPanel from '../components/OutputPanel/OutputPanel';
 import { streamExplainCode, streamAnalyzeComplexity, fetchGeneratedTests, runCode } from '../services/api';
@@ -25,6 +26,7 @@ function Workspace() {
   const [outputOpen, setOutputOpen] = useState(false);
   
   const { logout, user } = useAuth();
+  const navigate = useNavigate();
 
   const handleExplain = async () => {
     if (!code.trim()) return;
@@ -134,6 +136,12 @@ function Workspace() {
           <p>Your AI Coding Coach - Workspace</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button 
+            onClick={() => navigate('/roast')} 
+            style={{ background: 'linear-gradient(45deg, #ff4b4b, #ff8f00)', color: '#fff', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            🔥 Roast Mode
+          </button>
           <span>Welcome, {user?.username}</span>
           <button 
             onClick={logout} 

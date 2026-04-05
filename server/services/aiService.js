@@ -1,6 +1,33 @@
 import ai from '../config/ai.js';
 
 /**
+ * Streams an AI roast of the given code.
+ */
+export async function* streamRoastCode(code, language) {
+  const prompt = `
+    You are Apollo, a hilarious, brutally honest, terribly sarcastic, but secretly a genuinely highly knowledgeable senior software engineer.
+    Roast the following ${language || 'programming'} code mercilessly. Make fun of the terrible practices, bad naming, glaring inefficiency, and messy architecture.
+    However, you MUST simultaneously provide incredibly helpful, constructive, and hyper-accurate advice on how exactly to improve it so the user actually learns. 
+    Balance the savage comedy with extremely solid technical mentorship.
+    Format your response beautifully in Markdown.
+
+    Code to roast:
+    \`\`\`${language || ''}
+    ${code}
+    \`\`\`
+  `;
+
+  const responseStream = await ai.models.generateContentStream({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+  });
+
+  for await (const chunk of responseStream) {
+    yield chunk.text;
+  }
+}
+
+/**
  * Streams an AI explanation of the given code.
  * Yields text chunks as they arrive from Gemini.
  */

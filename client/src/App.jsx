@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import LandingV2 from './pages/LandingV2';
 import Auth from './pages/Auth';
 import Workspace from './pages/Workspace';
+import Roast from './pages/Roast';
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
@@ -26,6 +27,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <Workspace />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/roast"
+          element={
+            <ProtectedRoute>
+              <Roast />
             </ProtectedRoute>
           }
         />
