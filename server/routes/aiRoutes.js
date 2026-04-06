@@ -1,7 +1,10 @@
 import { Router } from 'express';
-import { explainCode, analyzeComplexity, generateTests, roastCode, reviewCode } from '../controllers/chatController.js';
+import { explainCode, analyzeComplexity, generateTests, roastCode, reviewCode, streamChat } from '../controllers/chatController.js';
 
 const router = Router();
+
+// POST /api/ai/chat — Unified streaming AI endpoint (uses mode engine)
+router.post('/chat', streamChat);
 
 // POST /api/ai/explain — Stream AI code explanation
 router.post('/explain', explainCode);

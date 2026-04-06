@@ -1,66 +1,72 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
 import CodeEditor from '../components/CodeEditor/CodeEditor';
 import OutputPanel from '../components/OutputPanel/OutputPanel';
-import { streamExplainCode, streamAnalyzeComplexity, fetchGeneratedTests, runCode } from '../services/api';
+import { streamAIChat, fetchGeneratedTests, runCode } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { LogOut } from 'lucide-react';
+import MODES from '../modes/modeConfig';
+import { LogOut, ChevronDown } from 'lucide-react';
 import '../App.css';
 
 function Workspace() {
   const [code, setCode] = useState('// Type or paste your code here...\n');
   const [language, setLanguage] = useState('javascript');
-  const [explanation, setExplanation] = useState('');
-  const [complexity, setComplexity] = useState('');
+  const [aiResponse, setAiResponse] = useState('');
   const [loading, setLoading] = useState(false);
-  const [loadingComplexity, setLoadingComplexity] = useState(false);
   const [testCases, setTestCases] = useState([]);
   const [loadingTests, setLoadingTests] = useState(false);
   const [runningTests, setRunningTests] = useState(false);
-  const [activeTab, setActiveTab] = useState('testcase'); // 'testcase' | 'testresult'
+  const [activeTab, setActiveTab] = useState('testcase');
+
+  // Mode state
+  const [activeMode, setActiveMode] = useState(MODES[0]); // default: explain
+  const [modeDropdownOpen, setModeDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   // Code execution state
   const [output, setOutput] = useState(null);
   const [running, setRunning] = useState(false);
   const [outputOpen, setOutputOpen] = useState(false);
+  const [stdin, setStdin] = useState('');
   
   const { logout, user } = useAuth();
   const navigate = useNavigate();
 
-  const handleExplain = async () => {
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setModeDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  const handleModeSelect = (mode) => {
+    setActiveMode(mode);
+    setModeDropdownOpen(false);
+    setAiResponse(''); // clear previous response on mode switch
+  };
+
+  // Unified AI action — uses the selected mode
+  const handleAskAI = async () => {
     if (!code.trim()) return;
 
     setLoading(true);
-    setExplanation('');
+    setAiResponse('');
 
-    await streamExplainCode({
+    await streamAIChat({
       code,
       language,
-      onChunk: (text) => setExplanation((prev) => prev + text),
-      onError: () => setExplanation('Error: Could not generate explanation.'),
+      mode: activeMode.key,
+      onChunk: (text) => setAiResponse((prev) => prev + text),
+      onError: () => setAiResponse('Error: Could not generate response.'),
     });
 
     setLoading(false);
   };
-
-  const handleAnalyzeComplexity = async () => {
-    if (!code.trim()) return;
-
-    setLoadingComplexity(true);
-    setComplexity('');
-
-    await streamAnalyzeComplexity({
-      code,
-      language,
-      onChunk: (text) => setComplexity((prev) => prev + text),
-      onError: () => setComplexity('Error: Could not generate complexity analysis.'),
-    });
-
-    setLoadingComplexity(false);
-  };
-
-  // Review Code moved to /code-review
 
   const handleGenerateTests = async () => {
     if (!code.trim()) return;
@@ -102,7 +108,6 @@ function Workspace() {
             results[i].actualOutput = e.message;
             results[i].status = 'error';
         }
-        // Stagger requests to avoid rate-limiting on Judge0's public API
         if (i < results.length - 1) {
             await new Promise(r => setTimeout(r, 1500));
         }
@@ -121,7 +126,7 @@ function Workspace() {
     setOutputOpen(true);
 
     try {
-      const result = await runCode({ code, language });
+      const result = await runCode({ code, language, stdin });
       setOutput(result);
     } catch (error) {
       setOutput({ stdout: '', stderr: error.message, exitCode: 1 });
@@ -135,36 +140,29 @@ function Workspace() {
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1>Apollo</h1>
-          <p>Your AI Coding Coach - Workspace</p>
+          <p>Your AI Coding Coach</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button 
-            onClick={() => navigate('/code-review')} 
-            style={{ background: 'linear-gradient(45deg, #4b73ff, #00d2ff)', color: '#fff', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            🔍 Code Review
-          </button>
-          <button 
-            onClick={() => navigate('/roast')} 
-            style={{ background: 'linear-gradient(45deg, #ff4b4b, #ff8f00)', color: '#fff', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            🔥 Roast Mode
-          </button>
-          <span>Welcome, {user?.username}</span>
+          <span style={{ color: '#888', fontSize: '0.82rem', fontWeight: 500 }}>Welcome, {user?.username}</span>
           <button 
             onClick={logout} 
             title="Logout"
             style={{ 
-              background: 'none', 
-              border: 'none', 
-              color: 'var(--accent-primary, #646cff)', 
+              background: 'rgba(255,255,255,0.05)', 
+              border: '1px solid rgba(255,255,255,0.1)', 
+              color: '#AAAAAA', 
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.4rem',
+              padding: '0.35rem 0.75rem',
+              borderRadius: '50px',
+              fontSize: '0.8rem',
+              fontFamily: 'DM Sans, Inter, sans-serif',
+              transition: 'all 0.15s',
             }}
           >
-            <LogOut size={20} /> Logout
+            <LogOut size={16} /> Logout
           </button>
         </div>
       </header>
@@ -173,46 +171,137 @@ function Workspace() {
         <div className="editor-section">
           <div className="editor-panel">
             <div className="controls">
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-              >
-                <option value="javascript">JavaScript</option>
-                <option value="python">Python</option>
-                <option value="java">Java</option>
-                <option value="cpp">C++</option>
-              </select>
+              {/* Left: Language + Mode Dropdown */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                >
+                  <option value="javascript">JavaScript</option>
+                  <option value="python">Python</option>
+                  <option value="java">Java</option>
+                  <option value="cpp">C++</option>
+                </select>
+
+                {/* ── Mode Switch Dropdown ── */}
+                <div className="mode-dropdown" ref={dropdownRef}>
+                  <button
+                    className="mode-dropdown-trigger"
+                    onClick={() => setModeDropdownOpen(!modeDropdownOpen)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      background: 'rgba(255,255,255,0.05)',
+                      border: `1px solid ${activeMode.color}35`,
+                      borderRadius: '50px',
+                      padding: '0.45rem 0.85rem',
+                      color: activeMode.color,
+                      cursor: 'pointer',
+                      fontFamily: 'DM Sans, Inter, sans-serif',
+                      fontSize: '0.82rem',
+                      fontWeight: 600,
+                      transition: 'all 0.15s ease',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    <span>{activeMode.icon}</span>
+                    <span>{activeMode.label}</span>
+                    <ChevronDown 
+                      size={14} 
+                      style={{ 
+                        transform: modeDropdownOpen ? 'rotate(180deg)' : 'rotate(0)', 
+                        transition: 'transform 0.2s' 
+                      }} 
+                    />
+                  </button>
+
+                  {modeDropdownOpen && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        marginTop: '6px',
+                        background: '#111111',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '14px',
+                        boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
+                        zIndex: 999,
+                        width: '280px',
+                        maxHeight: '400px',
+                        overflowY: 'auto',
+                        padding: '6px',
+                      }}
+                    >
+                      {MODES.map((mode) => (
+                        <button
+                          key={mode.key}
+                          onClick={() => handleModeSelect(mode)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '0.6rem',
+                            width: '100%',
+                            padding: '0.5rem 0.6rem',
+                            border: 'none',
+                            borderRadius: '10px',
+                            background: activeMode.key === mode.key ? `${mode.color}15` : 'transparent',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            color: '#fff',
+                            fontFamily: 'DM Sans, Inter, sans-serif',
+                            transition: 'background 0.1s',
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = `${mode.color}12`}
+                          onMouseLeave={(e) => e.currentTarget.style.background = activeMode.key === mode.key ? `${mode.color}18` : 'transparent'}
+                        >
+                          <span style={{ fontSize: '1rem', lineHeight: '1.4' }}>{mode.icon}</span>
+                          <div>
+                            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: mode.color }}>
+                              {mode.label}
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: '#888', lineHeight: '1.3', marginTop: '2px' }}>
+                              {mode.description}
+                            </div>
+                          </div>
+                          {activeMode.key === mode.key && (
+                            <span style={{ marginLeft: 'auto', color: mode.color, fontSize: '0.8rem', flexShrink: 0 }}>✓</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right: Action Buttons */}
               <div className="controls-right">
                 <button
                   onClick={handleRun}
                   disabled={running || !code.trim()}
                   className="run-btn"
                 >
-                  {running ? 'Running...' : 'Run Code'}
+                  {running ? 'Running...' : '▶ Run Code'}
                 </button>
                 <button
-                  onClick={handleExplain}
+                  onClick={handleAskAI}
                   disabled={loading || !code.trim()}
                   className="explain-btn"
+                  style={{ 
+                    background: loading ? undefined : `linear-gradient(135deg, ${activeMode.color}, ${activeMode.color}cc)`,
+                    color: '#fff',
+                    border: 'none',
+                  }}
                 >
-                  {loading ? 'Thinking...' : 'Explain Code'}
+                  {loading ? '⏳ Thinking...' : `${activeMode.icon} ${activeMode.label}`}
                 </button>
-                <button
-                  onClick={handleAnalyzeComplexity}
-                  disabled={loadingComplexity || !code.trim()}
-                  className="explain-btn"
-                  style={{ marginLeft: '10px' }}
-                >
-                  {loadingComplexity ? 'Analyzing...' : 'Analyze Complexity'}
-                </button>
-                {/* Review Code button removed */}
                 <button
                   onClick={handleGenerateTests}
                   disabled={loadingTests || !code.trim()}
                   className="explain-btn"
-                  style={{ marginLeft: '10px' }}
                 >
-                  {loadingTests ? 'Generating...' : 'Generate Tests'}
+                  {loadingTests ? 'Generating...' : '🧪 Generate Tests'}
                 </button>
               </div>
             </div>
@@ -282,26 +371,30 @@ function Workspace() {
               output={output}
               running={running}
               onClose={() => setOutputOpen(false)}
+              stdin={stdin}
+              onStdinChange={setStdin}
             />
           )}
         </div>
 
+        {/* Right: AI Response Panel */}
         <div className="chat-panel" style={{ overflowY: 'auto' }}>
-          <h2>Explanation</h2>
+          <h2 style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem',
+            color: activeMode.color,
+          }}>
+            <span>{activeMode.icon}</span> 
+            {activeMode.label}
+          </h2>
           <div className="markdown-container" style={{ marginBottom: '1rem' }}>
-            {explanation ? (
-              <ReactMarkdown>{explanation}</ReactMarkdown>
+            {aiResponse ? (
+              <ReactMarkdown>{aiResponse}</ReactMarkdown>
             ) : (
-              <p className="placeholder">Ask Apollo to explain your code.</p>
-            )}
-          </div>
-          
-          <h2>Complexity Analysis</h2>
-          <div className="markdown-container" style={{ marginBottom: '1rem' }}>
-            {complexity ? (
-              <ReactMarkdown>{complexity}</ReactMarkdown>
-            ) : (
-              <p className="placeholder">Ask Apollo to analyze the time and space complexity.</p>
+              <p className="placeholder">
+                Select a mode and click <strong>{activeMode.icon} {activeMode.label}</strong> to analyze your code.
+              </p>
             )}
           </div>
         </div>

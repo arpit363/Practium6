@@ -1,4 +1,22 @@
 import ai from '../config/ai.js';
+import { buildPrompt } from './modeEngine.js';
+
+/**
+ * Generic streaming function — uses the mode engine to pick the right system prompt.
+ * This is the NEW unified endpoint all modes should use.
+ */
+export async function* streamByMode(code, language, mode) {
+  const prompt = buildPrompt(mode, code, language);
+
+  const responseStream = await ai.models.generateContentStream({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+  });
+
+  for await (const chunk of responseStream) {
+    yield chunk.text;
+  }
+}
 
 /**
  * Streams an AI roast of the given code.
