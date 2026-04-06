@@ -1,4 +1,37 @@
-import { streamExplanation, streamComplexity, generateTestsAsJson, streamRoastCode, streamCodeReview } from '../services/aiService.js';
+import { streamExplanation, streamComplexity, generateTestsAsJson, streamRoastCode, streamCodeReview, streamByMode } from '../services/aiService.js';
+
+/**
+ * POST /api/ai/chat
+ * Generic streaming AI endpoint — accepts a `mode` key to select the AI persona.
+ */
+export async function streamChat(req, res) {
+  const { code, language, mode } = req.body;
+
+  if (!code) {
+    return res.status(400).json({ error: 'Code is required' });
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  try {
+    for await (const text of streamByMode(code, language, mode || 'explain')) {
+      res.write(`data: ${JSON.stringify({ text })}\n\n`);
+    }
+
+    res.write('data: [DONE]\n\n');
+    res.end();
+  } catch (error) {
+    console.error('Error in streamChat:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Failed to generate response', details: error.message });
+    } else {
+      res.write(`data: ${JSON.stringify({ error: 'Stream interrupted' })}\n\n`);
+      res.end();
+    }
+  }
+}
 
 /**
  * POST /api/ai/explain

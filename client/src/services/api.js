@@ -1,6 +1,63 @@
 const API_BASE = 'http://localhost:5000';
 
 /**
+ * Generic SSE streaming function — sends code + mode to the unified /api/ai/chat endpoint.
+ * All mode-specific streaming goes through this single function.
+ */
+export async function streamAIChat({ code, language, mode, onChunk, onDone, onError }) {
+  try {
+    const response = await fetch(`${API_BASE}/api/ai/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, language, mode }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch AI response');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let done = false;
+
+    while (!done) {
+      const { value, done: readerDone } = await reader.read();
+      done = readerDone;
+
+      if (value) {
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataStr = line.replace('data: ', '').trim();
+
+            if (dataStr === '[DONE]') {
+              done = true;
+              break;
+            }
+
+            if (dataStr) {
+              try {
+                const dataObj = JSON.parse(dataStr);
+                onChunk(dataObj.text);
+              } catch (e) {
+                console.error('Error parsing stream chunk', dataStr);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    onDone?.();
+  } catch (error) {
+    console.error(error);
+    onError?.(error);
+  }
+}
+
+/**
  * Streams an AI code explanation via SSE.
  * Calls the provided `onChunk` callback with each text token.
  */
@@ -132,14 +189,14 @@ export async function fetchGeneratedTests({ code, language }) {
 }
 
 /**
- * Executes code via the backend Piston proxy.
+ * Executes code via the backend runner with optional stdin.
  * Returns { stdout, stderr, exitCode }.
  */
-export async function runCode({ code, language }) {
+export async function runCode({ code, language, stdin }) {
   const response = await fetch(`${API_BASE}/api/code/run`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code, language }),
+    body: JSON.stringify({ code, language, stdin: stdin || '' }),
   });
 
   const result = await response.json();

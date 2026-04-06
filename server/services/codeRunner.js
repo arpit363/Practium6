@@ -18,7 +18,7 @@ const JUDGE0_LANGUAGE_MAP = {
  */
 export async function executeCode(code, language) {
   const isWindows = os.platform() === 'win32';
-  
+
   if (language === 'javascript') {
     const tempFile = path.join(os.tmpdir(), `test_${Date.now()}_${Math.floor(Math.random() * 1000)}.js`);
     await fs.writeFile(tempFile, code);
@@ -28,7 +28,7 @@ export async function executeCode(code, language) {
     } catch (err) {
       return { stdout: err.stdout || '', stderr: err.stderr || err.message, exitCode: err.code || 1 };
     } finally {
-      await fs.unlink(tempFile).catch(()=>null);
+      await fs.unlink(tempFile).catch(() => null);
     }
   } else if (language === 'python') {
     const tempFile = path.join(os.tmpdir(), `test_${Date.now()}_${Math.floor(Math.random() * 1000)}.py`);
@@ -40,7 +40,7 @@ export async function executeCode(code, language) {
     } catch (err) {
       return { stdout: err.stdout || '', stderr: err.stderr || err.message, exitCode: err.code || 1 };
     } finally {
-      await fs.unlink(tempFile).catch(()=>null);
+      await fs.unlink(tempFile).catch(() => null);
     }
   }
 
