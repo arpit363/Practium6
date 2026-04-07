@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import LandingV2 from './pages/LandingV2';
 import Auth from './pages/Auth';
 import Workspace from './pages/Workspace';
+import Features from './pages/Features';
 import Roast from './pages/Roast';
 import Review from './pages/Review';
 
@@ -22,6 +23,7 @@ function AppRoutes() {
       <Toaster position="top-right" toastOptions={{ style: { background: '#1e1e24', color: '#fff' } }} />
       <Routes>
         <Route path="/" element={<LandingV2 />} />
+        <Route path="/features" element={<Features />} />
         <Route path="/auth" element={user ? <Navigate to="/workspace" /> : <Auth />} />
         <Route
           path="/workspace"
