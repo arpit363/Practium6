@@ -1,6 +1,6 @@
 import Editor from '@monaco-editor/react';
 
-function CodeEditor({ language, value, onChange }) {
+function CodeEditor({ language, value, onChange, theme = 'vs-dark' }) {
   const handleChange = (newValue) => {
     onChange(newValue || '');
   };
@@ -11,7 +11,7 @@ function CodeEditor({ language, value, onChange }) {
       language={language}
       value={value}
       onChange={handleChange}
-      theme="vs-dark"
+      theme={theme}
       options={{
         fontSize: 14,
         fontFamily: "'Fira Code', monospace",
