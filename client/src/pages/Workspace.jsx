@@ -19,7 +19,8 @@ function ModeIcon({ name, size = 16, color, strokeWidth = 1.8 }) {
 function Workspace() {
   const [code, setCode] = useState('// Type or paste your code here...\n');
   const [language, setLanguage] = useState('javascript');
-  const [aiResponse, setAiResponse] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [chatInput, setChatInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [testCases, setTestCases] = useState([]);
   const [loadingTests, setLoadingTests] = useState(false);
@@ -99,18 +100,66 @@ function Workspace() {
 
   const handleModeSelect = (mode) => {
     setActiveMode(mode);
-    setAiResponse('');
+    setMessages([]);
+    setChatInput('');
   };
 
   const handleAskAI = async () => {
     if (!code.trim()) return;
     setLoading(true);
-    setAiResponse('');
+    setMessages([
+      { role: 'user', content: `Please run ${activeMode.label} mode on my code.` },
+      { role: 'model', content: '' }
+    ]);
     await streamAIChat({
       code, language,
       mode: activeMode.key,
-      onChunk: (text) => setAiResponse((prev) => prev + text),
-      onError: () => setAiResponse('Error: Could not generate response.'),
+      history: [],
+      onChunk: (text) => setMessages((prev) => {
+        const updated = [...prev];
+        const lastIndex = updated.length - 1;
+        updated[lastIndex] = { ...updated[lastIndex], content: updated[lastIndex].content + text };
+        return updated;
+      }),
+      onError: () => setMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1].content = 'Error: Could not generate response.';
+        return updated;
+      }),
+    });
+    setLoading(false);
+  };
+
+  const handleSendMessage = async () => {
+    if (!chatInput.trim() || loading || !code.trim()) return;
+    
+    const userMsg = chatInput.trim();
+    setChatInput('');
+    setLoading(true);
+
+    const historyForApi = [...messages];
+    
+    setMessages((prev) => [
+      ...prev,
+      { role: 'user', content: userMsg },
+      { role: 'model', content: '' }
+    ]);
+
+    await streamAIChat({
+      code, language,
+      mode: activeMode.key,
+      history: historyForApi.concat({ role: 'user', content: userMsg }),
+      onChunk: (text) => setMessages((prev) => {
+        const updated = [...prev];
+        const lastIndex = updated.length - 1;
+        updated[lastIndex] = { ...updated[lastIndex], content: updated[lastIndex].content + text };
+        return updated;
+      }),
+      onError: () => setMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1].content = 'Error: Could not generate response.';
+        return updated;
+      }),
     });
     setLoading(false);
   };
@@ -323,9 +372,24 @@ function Workspace() {
             <ModeIcon name={activeMode.lucideIcon} size={15} color={activeMode.color} />
             <span style={{ color: activeMode.color }}>{activeMode.label}</span>
           </div>
-          <div className="ws-chat-body">
-            {aiResponse ? (
-              <ReactMarkdown>{aiResponse}</ReactMarkdown>
+          <div className="ws-chat-body" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflowY: 'auto' }}>
+            {messages.length > 0 ? (
+              <div className="ws-chat-messages" style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '16px' }}>
+                {messages.map((msg, i) => (
+                   <div key={i} className={`ws-chat-msg ${msg.role === 'model' ? 'ai-msg' : 'user-msg'}`} style={{
+                     alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                     background: msg.role === 'user' ? (darkMode ? '#323842' : '#e1e4e8') : 'transparent',
+                     padding: msg.role === 'user' ? '10px 14px' : '0',
+                     borderRadius: msg.role === 'user' ? '12px 12px 0 12px' : '0',
+                     maxWidth: '90%',
+                     overflowX: 'auto',
+                     fontSize: '0.92rem',
+                     wordBreak: 'break-word'
+                   }}>
+                     {msg.role === 'model' ? <ReactMarkdown>{msg.content}</ReactMarkdown> : <span style={{ color: darkMode ? '#c9d1d9' : '#24292f' }}>{msg.content}</span>}
+                   </div>
+                ))}
+              </div>
             ) : (
               <div className="ws-chat-empty">
                 <div className="ws-chat-empty-icon">
@@ -335,6 +399,27 @@ function Workspace() {
               </div>
             )}
           </div>
+          {messages.length > 0 && (
+            <div className="ws-chat-input-area" style={{ padding: '12px', borderTop: '1px solid var(--ws-border)', display: 'flex', gap: '8px', background: darkMode ? '#1e1e1e' : '#fff' }}>
+              <input 
+                type="text" 
+                value={chatInput} 
+                onChange={(e) => setChatInput(e.target.value)} 
+                onKeyDown={(e) => { if (e.key === 'Enter') handleSendMessage(); }}
+                placeholder="Ask a follow-up question..." 
+                disabled={loading}
+                style={{ flex: 1, background: darkMode ? '#0d1117' : '#f6f8fa', color: darkMode ? '#c9d1d9' : '#24292f', border: '1px solid var(--ws-border)', padding: '10px 14px', borderRadius: '6px', outline: 'none' }}
+              />
+              <button 
+                onClick={handleSendMessage} 
+                disabled={loading || !chatInput.trim()} 
+                className="ws-btn ws-btn-run"
+                style={{ padding: '8px 12px', borderRadius: '6px' }}
+              >
+                <LucideIcons.Send size={15} />
+              </button>
+            </div>
+          )}
         </aside>
       </div>
     </div>
