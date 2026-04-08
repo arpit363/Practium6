@@ -4,12 +4,12 @@ const API_BASE = 'http://localhost:5000';
  * Generic SSE streaming function — sends code + mode to the unified /api/ai/chat endpoint.
  * All mode-specific streaming goes through this single function.
  */
-export async function streamAIChat({ code, language, mode, onChunk, onDone, onError }) {
+export async function streamAIChat({ code, language, mode, history, onChunk, onDone, onError }) {
   try {
     const response = await fetch(`${API_BASE}/api/ai/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, language, mode }),
+      body: JSON.stringify({ code, language, mode, history }),
     });
 
     if (!response.ok) {

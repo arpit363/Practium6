@@ -5,7 +5,7 @@ import { streamExplanation, streamComplexity, generateTestsAsJson, streamRoastCo
  * Generic streaming AI endpoint — accepts a `mode` key to select the AI persona.
  */
 export async function streamChat(req, res) {
-  const { code, language, mode } = req.body;
+  const { code, language, mode, history } = req.body;
 
   if (!code) {
     return res.status(400).json({ error: 'Code is required' });
@@ -16,7 +16,7 @@ export async function streamChat(req, res) {
   res.setHeader('Connection', 'keep-alive');
 
   try {
-    for await (const text of streamByMode(code, language, mode || 'explain')) {
+    for await (const text of streamByMode(code, language, mode || 'explain', history)) {
       res.write(`data: ${JSON.stringify({ text })}\n\n`);
     }
 

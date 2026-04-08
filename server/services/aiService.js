@@ -5,12 +5,31 @@ import { buildPrompt } from './modeEngine.js';
  * Generic streaming function — uses the mode engine to pick the right system prompt.
  * This is the NEW unified endpoint all modes should use.
  */
-export async function* streamByMode(code, language, mode) {
+export async function* streamByMode(code, language, mode, history = []) {
   const prompt = buildPrompt(mode, code, language);
+
+  let formattedContents = [];
+
+  if (history && history.length > 0) {
+    formattedContents = history.map((msg, idx) => {
+      if (idx === 0 && msg.role === 'user') {
+        return {
+          role: 'user',
+          parts: [{ text: `${prompt}\n\nUser Request: ${msg.content}` }]
+        };
+      }
+      return {
+        role: msg.role === 'model' ? 'model' : 'user',
+        parts: [{ text: msg.content }]
+      };
+    });
+  } else {
+    formattedContents = [{ role: 'user', parts: [{ text: prompt }] }];
+  }
 
   const responseStream = await ai.models.generateContentStream({
     model: 'gemini-2.5-flash',
-    contents: prompt,
+    contents: formattedContents,
   });
 
   for await (const chunk of responseStream) {
