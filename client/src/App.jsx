@@ -7,6 +7,7 @@ import Workspace from './pages/Workspace';
 import Features from './pages/Features';
 import Roast from './pages/Roast';
 import Review from './pages/Review';
+import Profile from './pages/Profile';
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
@@ -46,6 +47,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <Review />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />
