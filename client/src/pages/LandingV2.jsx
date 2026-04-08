@@ -132,9 +132,9 @@ function NavbarV2() {
             </ul>
 
             <div className="lv2-nav-right">
-                <Link to="/workspace" className="lv2-nav-pill">Workspace</Link>
-                <Link to={user ? '/workspace' : '/auth'} className="lv2-btn-primary">
-                    {user ? 'Open Editor' : 'Get Started'}
+                <Link to={user ? '/dashboard' : '/auth'} className="lv2-nav-pill">Dashboard</Link>
+                <Link to={user ? '/profile' : '/auth'} className="lv2-btn-primary">
+                    {user ? 'Profile' : 'Get Started'}
                 </Link>
             </div>
 
@@ -177,11 +177,11 @@ function HeroV2() {
                 </p>
 
                 <div className="lv2-hero-buttons">
-                    <Link to={user ? '/workspace' : '/auth'} className="lv2-btn-primary lv2-btn-lg">
-                        Start Coding Free &#8594;
+                    <Link to="/features" className="lv2-btn-primary lv2-btn-lg">
+                        Explore All Features &#8594;
                     </Link>
-                    <Link to="/features" className="lv2-btn-secondary lv2-btn-lg">
-                        Explore All Features
+                    <Link to={user ? '/workspace' : '/auth'} className="lv2-btn-secondary lv2-btn-lg">
+                        Workspace
                     </Link>
                 </div>
             </div>
