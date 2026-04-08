@@ -180,9 +180,9 @@ function HeroV2() {
                     <Link to={user ? '/workspace' : '/auth'} className="lv2-btn-primary lv2-btn-lg">
                         Start Coding Free &#8594;
                     </Link>
-                    <a href="#lv2-process" className="lv2-btn-secondary lv2-btn-lg">
-                        See How It Works
-                    </a>
+                    <Link to="/features" className="lv2-btn-secondary lv2-btn-lg">
+                        Explore All Features
+                    </Link>
                 </div>
             </div>
         </section>
