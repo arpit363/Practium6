@@ -9,7 +9,7 @@ export async function streamAIChat({ code, language, mode, history, onChunk, onD
     const response = await fetch(`${API_BASE}/api/ai/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, language, mode, history }),
+      body: JSON.stringify({ code, language, mode, history: history || [] }),
     });
 
     if (!response.ok) {

@@ -5,11 +5,10 @@ import CodeEditor from '../components/CodeEditor/CodeEditor';
 import OutputPanel from '../components/OutputPanel/OutputPanel';
 import { streamAIChat, fetchGeneratedTests, runCode } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import MODES from '../modes/modeConfig';
+import { EDITOR_MODES } from '../modes/modeConfig';
 import * as LucideIcons from 'lucide-react';
 import '../App.css';
 
-// Helper to render a Lucide icon by name
 function ModeIcon({ name, size = 16, color, strokeWidth = 1.8 }) {
   const Icon = LucideIcons[name];
   if (!Icon) return null;
@@ -22,11 +21,11 @@ function Workspace() {
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [activeMode, setActiveMode] = useState(EDITOR_MODES[0]);
   const [testCases, setTestCases] = useState([]);
   const [loadingTests, setLoadingTests] = useState(false);
   const [runningTests, setRunningTests] = useState(false);
   const [activeTab, setActiveTab] = useState('testcase');
-  const [activeMode, setActiveMode] = useState(MODES[0]);
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('apollo-theme');
     return saved ? saved === 'dark' : true;
@@ -39,14 +38,13 @@ function Workspace() {
   // Resizable panel widths
   const [sidebarWidth, setSidebarWidth] = useState(220);
   const [chatWidth, setChatWidth] = useState(340);
-  const dragging = useRef(null); // 'sidebar' | 'chat' | null
+  const dragging = useRef(null);
   const startX = useRef(0);
   const startWidth = useRef(0);
 
   const { logout, user } = useAuth();
   const navigate = useNavigate();
 
-  // Resize handlers
   const handleMouseDown = useCallback((panel, e) => {
     e.preventDefault();
     dragging.current = panel;
@@ -61,13 +59,9 @@ function Workspace() {
       if (!dragging.current) return;
       const delta = e.clientX - startX.current;
       if (dragging.current === 'sidebar') {
-        const newW = Math.max(160, Math.min(400, startWidth.current + delta));
-        setSidebarWidth(newW);
+        setSidebarWidth(Math.max(160, Math.min(400, startWidth.current + delta)));
       } else if (dragging.current === 'chat') {
-        // Chat resize: dragging right edge of editor = left edge of chat
-        // Moving mouse right → chat shrinks
-        const newW = Math.max(240, Math.min(600, startWidth.current - delta));
-        setChatWidth(newW);
+        setChatWidth(Math.max(240, Math.min(600, startWidth.current - delta)));
       }
     };
     const handleMouseUp = () => {
@@ -85,16 +79,10 @@ function Workspace() {
     };
   }, []);
 
-  // Theme toggle — apply class + persist
   useEffect(() => {
     const root = document.documentElement;
-    if (darkMode) {
-      root.classList.remove('light-mode');
-      root.classList.add('dark-mode');
-    } else {
-      root.classList.remove('dark-mode');
-      root.classList.add('light-mode');
-    }
+    if (darkMode) { root.classList.remove('light-mode'); root.classList.add('dark-mode'); }
+    else { root.classList.remove('dark-mode'); root.classList.add('light-mode'); }
     localStorage.setItem('apollo-theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
 
@@ -104,6 +92,7 @@ function Workspace() {
     setChatInput('');
   };
 
+  // Run the selected Type 1 mode on the code
   const handleAskAI = async () => {
     if (!code.trim()) return;
     setLoading(true);
@@ -115,51 +104,8 @@ function Workspace() {
       code, language,
       mode: activeMode.key,
       history: [],
-      onChunk: (text) => setMessages((prev) => {
-        const updated = [...prev];
-        const lastIndex = updated.length - 1;
-        updated[lastIndex] = { ...updated[lastIndex], content: updated[lastIndex].content + text };
-        return updated;
-      }),
-      onError: () => setMessages((prev) => {
-        const updated = [...prev];
-        updated[updated.length - 1].content = 'Error: Could not generate response.';
-        return updated;
-      }),
-    });
-    setLoading(false);
-  };
-
-  const handleSendMessage = async () => {
-    if (!chatInput.trim() || loading || !code.trim()) return;
-    
-    const userMsg = chatInput.trim();
-    setChatInput('');
-    setLoading(true);
-
-    const historyForApi = [...messages];
-    
-    setMessages((prev) => [
-      ...prev,
-      { role: 'user', content: userMsg },
-      { role: 'model', content: '' }
-    ]);
-
-    await streamAIChat({
-      code, language,
-      mode: activeMode.key,
-      history: historyForApi.concat({ role: 'user', content: userMsg }),
-      onChunk: (text) => setMessages((prev) => {
-        const updated = [...prev];
-        const lastIndex = updated.length - 1;
-        updated[lastIndex] = { ...updated[lastIndex], content: updated[lastIndex].content + text };
-        return updated;
-      }),
-      onError: () => setMessages((prev) => {
-        const updated = [...prev];
-        updated[updated.length - 1].content = 'Error: Could not generate response.';
-        return updated;
-      }),
+      onChunk: (text) => setAiResponse((prev) => prev + text),
+      onError: () => setAiResponse('Error: Could not generate response.'),
     });
     setLoading(false);
   };
@@ -172,7 +118,7 @@ function Workspace() {
       const generated = await fetchGeneratedTests({ code, language });
       setTestCases(generated.map(tc => ({ ...tc, status: 'pending', actualOutput: null })));
       setActiveTab('testcase');
-    } catch (e) {
+    } catch {
       setTestCases([{ inputs: 'Error', expectedOutput: '', callCode: '', status: 'failed', actualOutput: 'Could not generate tests' }]);
     }
     setLoadingTests(false);
@@ -217,7 +163,7 @@ function Workspace() {
 
   return (
     <div className={`ws-root ${darkMode ? 'dark-mode' : 'light-mode'}`}>
-      {/* ═══════ FULL-WIDTH TOP BAR ═══════ */}
+      {/* ═══════ TOP BAR ═══════ */}
       <div className="ws-topbar">
         <div className="ws-topbar-left">
           <div className="ws-topbar-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
@@ -225,11 +171,7 @@ function Workspace() {
             <span>Apollo</span>
           </div>
           <div className="ws-topbar-divider" />
-          <select
-            className="ws-lang-select"
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-          >
+          <select className="ws-lang-select" value={language} onChange={(e) => setLanguage(e.target.value)}>
             <option value="javascript">JavaScript</option>
             <option value="python">Python</option>
             <option value="java">Java</option>
@@ -261,9 +203,7 @@ function Workspace() {
           </button>
           <div className="ws-topbar-divider" />
           <div className="ws-user-badge">
-            <div className="ws-user-avatar">
-              {(user?.username || 'U').charAt(0).toUpperCase()}
-            </div>
+            <div className="ws-user-avatar">{(user?.username || 'U').charAt(0).toUpperCase()}</div>
             <div className="ws-user-info">
               <span className="ws-user-name">{user?.username || 'User'}</span>
               <span className="ws-user-email">{user?.email || ''}</span>
@@ -272,18 +212,38 @@ function Workspace() {
         </div>
       </div>
 
-      {/* ═══════ BODY: 3 RESIZABLE COLUMNS ═══════ */}
+      {/* ═══════ BODY: 3 COLUMNS ═══════ */}
       <div className="ws-body">
-        {/* LEFT SIDEBAR */}
+        {/* LEFT SIDEBAR — Only Type 1 (Editor) modes */}
         <aside className="ws-sidebar" style={{ width: sidebarWidth, minWidth: sidebarWidth }}>
-          <button className="ws-new-btn" onClick={() => navigate('/workspace')}>
-            <LucideIcons.Plus size={15} /> New Workspace
-          </button>
+          <div className="ws-sidebar-section">
+            <span className="ws-section-label">WORKSPACES</span>
+            <button className="ws-mode-item active" onClick={() => navigate('/workspace')}>
+              <LucideIcons.Code2 size={15} color="#9B40E0" />
+              <span>Code Editor</span>
+            </button>
+            <button className="ws-mode-item" onClick={() => navigate('/workspace/chat')}>
+              <LucideIcons.MessageSquare size={15} color="#666" />
+              <span>AI Coaching Chat</span>
+            </button>
+          </div>
 
           <div className="ws-sidebar-section">
-            <span className="ws-section-label">MODES</span>
+            <span className="ws-section-label">IMMERSIVE</span>
+            <button className="ws-mode-item" onClick={() => navigate('/interview')}>
+              <LucideIcons.ShieldCheck size={15} color="#666" />
+              <span>Interview Prep</span>
+            </button>
+            <button className="ws-mode-item" onClick={() => navigate('/focus')}>
+              <LucideIcons.Target size={15} color="#666" />
+              <span>Focus Session</span>
+            </button>
+          </div>
+
+          <div className="ws-sidebar-section" style={{ flex: 1, overflowY: 'auto' }}>
+            <span className="ws-section-label">CODE ANALYSIS</span>
             <nav className="ws-mode-list">
-              {MODES.map((mode) => (
+              {EDITOR_MODES.map((mode) => (
                 <button
                   key={mode.key}
                   className={`ws-mode-item ${activeMode.key === mode.key ? 'active' : ''}`}
@@ -298,11 +258,6 @@ function Workspace() {
           </div>
 
           <div className="ws-sidebar-bottom">
-            <span className="ws-section-label">SUPPORT</span>
-            <button className="ws-mode-item">
-              <LucideIcons.Settings size={15} color="#666" />
-              <span>Account Settings</span>
-            </button>
             <button className="ws-mode-item" onClick={logout}>
               <LucideIcons.LogOut size={15} color="#666" />
               <span>Logout</span>
@@ -310,11 +265,7 @@ function Workspace() {
           </div>
         </aside>
 
-        {/* RESIZE HANDLE: Sidebar ↔ Editor */}
-        <div
-          className="ws-resize-handle"
-          onMouseDown={(e) => handleMouseDown('sidebar', e)}
-        />
+        <div className="ws-resize-handle" onMouseDown={(e) => handleMouseDown('sidebar', e)} />
 
         {/* CENTER EDITOR */}
         <main className="ws-main">
@@ -360,13 +311,9 @@ function Workspace() {
           </div>
         </main>
 
-        {/* RESIZE HANDLE: Editor ↔ Chat */}
-        <div
-          className="ws-resize-handle"
-          onMouseDown={(e) => handleMouseDown('chat', e)}
-        />
+        <div className="ws-resize-handle" onMouseDown={(e) => handleMouseDown('chat', e)} />
 
-        {/* RIGHT CHAT */}
+        {/* RIGHT PANEL — AI Result for the selected Type 1 mode */}
         <aside className="ws-chat" style={{ width: chatWidth, minWidth: chatWidth }}>
           <div className="ws-chat-header">
             <ModeIcon name={activeMode.lucideIcon} size={15} color={activeMode.color} />
