@@ -348,10 +348,9 @@ body {
 
 /* Section Labels */
 .ws-sidebar-section {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  margin-bottom: 0.25rem;
 }
 
 .ws-section-label {

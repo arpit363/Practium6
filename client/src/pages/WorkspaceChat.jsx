@@ -118,9 +118,32 @@ function WorkspaceChat() {
 
       {/* BODY */}
       <div className="wsc-body">
-        {/* SIDEBAR — Only Type 2 chat personas */}
         <aside className="wsc-sidebar">
-          <div className="wsc-nav-section">
+          <div className="ws-sidebar-section">
+            <span className="ws-section-label">WORKSPACES</span>
+            <button className="ws-mode-item" onClick={() => navigate('/workspace')}>
+              <LucideIcons.Code2 size={15} color="#666" />
+              <span>Code Editor</span>
+            </button>
+            <button className="ws-mode-item active" onClick={() => navigate('/workspace/chat')}>
+              <LucideIcons.MessageSquare size={15} color="#9B40E0" />
+              <span>AI Coaching Chat</span>
+            </button>
+          </div>
+
+          <div className="ws-sidebar-section">
+            <span className="ws-section-label">IMMERSIVE</span>
+            <button className="ws-mode-item" onClick={() => navigate('/interview')}>
+              <LucideIcons.ShieldCheck size={15} color="#666" />
+              <span>Interview Prep</span>
+            </button>
+            <button className="ws-mode-item" onClick={() => navigate('/focus')}>
+              <LucideIcons.Target size={15} color="#666" />
+              <span>Focus Session</span>
+            </button>
+          </div>
+
+          <div className="ws-sidebar-section" style={{ flex: 1, overflowY: 'auto' }}>
             <span className="ws-section-label">CHAT PERSONAS</span>
             <nav className="ws-mode-list">
               {CHAT_MODES.map((mode) => (
@@ -138,11 +161,6 @@ function WorkspaceChat() {
           </div>
 
           <div className="ws-sidebar-bottom">
-            <span className="ws-section-label">NAVIGATE</span>
-            <button className="ws-mode-item" onClick={() => navigate('/workspace')}>
-              <LucideIcons.Code2 size={15} color="#666" />
-              <span>Code Editor</span>
-            </button>
             <button className="ws-mode-item" onClick={logout}>
               <LucideIcons.LogOut size={15} color="#666" />
               <span>Logout</span>
