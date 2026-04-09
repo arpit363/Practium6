@@ -66,17 +66,22 @@ const Auth = () => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
+    <div className="au-root">
+      <div className="au-aurora">
+        <div className="au-orb au-orb-1" />
+        <div className="au-orb au-orb-2" />
+      </div>
+
+      <div className="au-card">
+        <div className="au-header">
           <h1>Apollo</h1>
           <p>{showOtp ? 'Verify Your Account' : isLogin ? 'Welcome Back' : 'Join Apollo'}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={handleSubmit} className="au-form">
           {showOtp ? (
             <>
-              <div className="input-group">
+              <div className="au-input-group">
                 <ShieldCheck className="icon" />
                 <input
                   type="text"
@@ -87,12 +92,12 @@ const Auth = () => {
                   required
                 />
               </div>
-              <p className="otp-hint">We sent a verification code to {formData.email}</p>
+              <p className="au-otp-hint">We sent a verification code to {formData.email}</p>
             </>
           ) : (
             <>
               {!isLogin && (
-                <div className="input-group">
+                <div className="au-input-group">
                   <UserIcon className="icon" />
                   <input
                     type="text"
@@ -105,7 +110,7 @@ const Auth = () => {
                 </div>
               )}
               
-              <div className="input-group">
+              <div className="au-input-group">
                 <Mail className="icon" />
                 <input
                   type="email"
@@ -117,7 +122,7 @@ const Auth = () => {
                 />
               </div>
 
-              <div className="input-group">
+              <div className="au-input-group">
                 <Lock className="icon" />
                 <input
                   type="password"
@@ -131,18 +136,18 @@ const Auth = () => {
             </>
           )}
 
-          <button type="submit" className="submit-btn" disabled={loading}>
+          <button type="submit" className="au-submit-btn" disabled={loading}>
             {loading ? 'Processing...' : showOtp ? 'Verify OTP' : isLogin ? 'Log In' : 'Sign Up'}
           </button>
         </form>
 
         {!showOtp && (
-          <div className="auth-footer">
+          <div className="au-footer">
             <p>
               {isLogin ? "Don't have an account?" : "Already have an account?"}
               <button 
                 type="button" 
-                className="toggle-btn"
+                className="au-toggle-btn"
                 onClick={() => setIsLogin(!isLogin)}
               >
                 {isLogin ? 'Sign up' : 'Log in'}
