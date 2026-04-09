@@ -3,144 +3,6 @@ import { useAuth } from '../context/AuthContext';
 import * as LucideIcons from 'lucide-react';
 import './Features.css';
 
-/* ═══════════════════════════════════════════
-   FEATURE CARDS DATA
-   ═══════════════════════════════════════════ */
-
-const WORKSPACE_MODES = [
-  {
-    key: 'explain',
-    label: 'Code Explainer',
-    icon: 'BookOpen',
-    color: '#58a6ff',
-    desc: 'Breaks down your code line-by-line with clear explanations for any skill level.',
-  },
-  {
-    key: 'roast',
-    label: 'Roast My Code',
-    icon: 'Flame',
-    color: '#f85149',
-    desc: 'Brutal but constructive code critique with humor — your code will never be the same.',
-  },
-  {
-    key: 'review',
-    label: 'Code Review',
-    icon: 'Search',
-    color: '#4bccff',
-    desc: 'Finds bugs, anti-patterns, SOLID violations, and suggests professional fixes.',
-  },
-  {
-    key: 'complexity',
-    label: 'Complexity Analyzer',
-    icon: 'Timer',
-    color: '#d29922',
-    desc: 'Parses Big-O time and space complexity with line-by-line breakdown.',
-  },
-  {
-    key: 'refactor',
-    label: 'Refactor Studio',
-    icon: 'RefreshCw',
-    color: '#39d353',
-    desc: 'Converts messy spaghetti code into clean, modern, production-ready implementations.',
-  },
-  {
-    key: 'debug',
-    label: 'Debug Companion',
-    icon: 'Bug',
-    color: '#f778ba',
-    desc: 'Reads errors, finds the flawed line, and delivers step-by-step fixes.',
-  },
-  {
-    key: 'security',
-    label: 'Security Guardian',
-    icon: 'Shield',
-    color: '#ff7b72',
-    desc: 'Scans for vulnerabilities — SQLi, XSS, CSRF — and patches them instantly.',
-  },
-  {
-    key: 'multilingual',
-    label: 'Multilingual Mode',
-    icon: 'Globe',
-    color: '#79c0ff',
-    desc: 'Explains programming concepts in any spoken language for global accessibility.',
-  },
-];
-
-const STUDY_MODES = [
-  {
-    key: 'dsa',
-    label: 'DSA Learning',
-    icon: 'BarChart3',
-    color: '#3fb950',
-    desc: 'Guides you from brute-force to optimal O(N) solutions with visual complexity analysis.',
-  },
-  {
-    key: 'hint',
-    label: 'Hint Assistant',
-    icon: 'Lightbulb',
-    color: '#f0883e',
-    desc: 'Refuses to give direct answers — provides progressive logic hints to trigger self-discovery.',
-  },
-  {
-    key: 'socratic',
-    label: 'Socratic Coach',
-    icon: 'Brain',
-    color: '#a371f7',
-    desc: 'Responds only with carefully crafted guiding questions that lead you to the answer.',
-  },
-  {
-    key: 'persona_yoda',
-    label: 'Yoda Persona',
-    icon: 'Wand2',
-    color: '#7ee787',
-    desc: 'Teaches you the code, Yoda will. Backwards speech and ancient wisdom included.',
-  },
-  {
-    key: 'persona_friendly',
-    label: 'Friendly Buddy',
-    icon: 'Heart',
-    color: '#f0883e',
-    desc: 'Warm, encouraging, and infinitely patient. The perfect companion for beginners.',
-  },
-  {
-    key: 'persona_strict',
-    label: 'Strict Teacher',
-    icon: 'GraduationCap',
-    color: '#8b949e',
-    desc: 'No hand-holding. Expects excellence, precision, and clean code at all times.',
-  },
-];
-
-/* ═══════════════════════════════════════════
-   HELPER: Render Lucide Icon
-   ═══════════════════════════════════════════ */
-function Icon({ name, size = 20, color = '#fff', strokeWidth = 1.8 }) {
-  const Comp = LucideIcons[name];
-  if (!Comp) return null;
-  return <Comp size={size} color={color} strokeWidth={strokeWidth} />;
-}
-
-/* ═══════════════════════════════════════════
-   FEATURE CARD
-   ═══════════════════════════════════════════ */
-function FeatureCard({ mode }) {
-  return (
-    <div className="ft-card">
-      <div className="ft-card-icon" style={{ background: `${mode.color}12`, borderColor: `${mode.color}25` }}>
-        <Icon name={mode.icon} size={22} color={mode.color} />
-      </div>
-      <h3 className="ft-card-title" style={{ color: mode.color }}>{mode.label}</h3>
-      <p className="ft-card-desc">{mode.desc}</p>
-      <Link to="/workspace" className="ft-card-link" style={{ color: mode.color }}>
-        Try it <span>→</span>
-      </Link>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════
-   MAIN FEATURES PAGE
-   ═══════════════════════════════════════════ */
 function Features() {
   const { user } = useAuth();
 
@@ -168,51 +30,181 @@ function Features() {
       <header className="ft-hero">
         <span className="ft-badge">
           <span className="ft-badge-dot" />
-          14 AI Modes Available
+          The Final Frontier of AI Coding
         </span>
         <h1 className="ft-title">
-          Every mode you'll{' '}
-          <span className="ft-serif">ever need.</span>
+          Not just an editor.<br />
+          <span className="ft-serif">An entirely new brain.</span>
         </h1>
         <p className="ft-subtitle">
-          From code reviews to DSA coaching, Apollo's AI modes cover every scenario.
-          Pick a mode, paste your code, and get instant, streaming feedback.
+          Apollo doesn’t just complete your code—it teaches you how to write it perfectly. 
+          Explore all 15 specialized immersive modes designed to 10x your engineering skills.
         </p>
       </header>
 
-      {/* ───── WORKSPACE SECTION ───── */}
-      <section className="ft-section">
-        <div className="ft-section-header">
-          <div className="ft-section-icon">
-            <LucideIcons.Code2 size={20} color="#7B2FBE" />
+      {/* Bento Box Layout */}
+      <section className="ft-bento-section">
+        <div className="ft-bento-grid">
+          
+          {/* ROW 1 & 2 (8 blocks) */}
+          
+          <div className="ft-bn-card ft-bn-large">
+            <div className="ft-bn-bg-glow" style={{ background: '#58a6ff' }} />
+            <div className="ft-bn-header">
+              <div className="ft-bn-icon" style={{ color: '#58a6ff', background: 'rgba(88, 166, 255, 0.1)' }}>
+                <LucideIcons.Code2 size={24} />
+              </div>
+              <h3>Editor Superpowers</h3>
+            </div>
+            <p>Your right-hand engineering team. Instantly detect bugs, refactor spaghetti code, and analyze Big-O complexity in real-time as you type.</p>
+            
+            <div className="ft-bn-feature-list">
+              <div className="ft-bn-feature-item">
+                <div className="fi-icon"><LucideIcons.BookOpen size={16} color="#58a6ff" /></div>
+                <div className="fi-text"><strong>Code Explainer:</strong> Breaks down complex blocks line-by-line.</div>
+              </div>
+              <div className="ft-bn-feature-item">
+                <div className="fi-icon"><LucideIcons.RefreshCw size={16} color="#39d353" /></div>
+                <div className="fi-text"><strong>Refactor Studio:</strong> Converts messy code to clean implementations.</div>
+              </div>
+              <div className="ft-bn-feature-item">
+                <div className="fi-icon"><LucideIcons.Search size={16} color="#4bccff" /></div>
+                <div className="fi-text"><strong>Code Review:</strong> Finds bugs and SOLID violations instantly.</div>
+              </div>
+              <div className="ft-bn-feature-item">
+                <div className="fi-icon"><LucideIcons.Bug size={16} color="#f778ba" /></div>
+                <div className="fi-text"><strong>Debug Companion:</strong> Finds the flawed line and provides a fix.</div>
+              </div>
+            </div>
           </div>
-          <div>
-            <h2 className="ft-section-title">Workspace</h2>
-            <p className="ft-section-desc">Code analysis, debugging, and professional-grade tooling.</p>
-          </div>
-        </div>
-        <div className="ft-grid">
-          {WORKSPACE_MODES.map((m) => (
-            <FeatureCard key={m.key} mode={m} />
-          ))}
-        </div>
-      </section>
 
-      {/* ───── START STUDY SECTION ───── */}
-      <section className="ft-section">
-        <div className="ft-section-header">
-          <div className="ft-section-icon">
-            <LucideIcons.GraduationCap size={20} color="#22c55e" />
+          <div className="ft-bn-card ft-bn-tall">
+            <div className="ft-bn-bg-glow" style={{ background: '#a371f7' }} />
+            <div className="ft-bn-header">
+              <div className="ft-bn-icon" style={{ color: '#a371f7', background: 'rgba(163, 113, 247, 0.1)' }}>
+                <LucideIcons.MessageSquare size={24} />
+              </div>
+              <h3>AI Personas</h3>
+            </div>
+            <p>Why get answers when you can get understanding? Chat directly with personas tailored perfectly to your learning style.</p>
+            <div className="ft-bn-tags">
+              <span className="tag-purple"><LucideIcons.Brain size={12}/> Socratic Coach</span>
+              <span className="tag-orange"><LucideIcons.Lightbulb size={12}/> Hint-First</span>
+              <span className="tag-green"><LucideIcons.Wand2 size={12}/> Yoda Persona</span>
+              <span className="tag-blue"><LucideIcons.Globe size={12}/> Multilingual</span>
+              <span className="tag-gray"><LucideIcons.GraduationCap size={12}/> Strict Teacher</span>
+            </div>
+            <div className="ft-bn-visual ft-visual-chat">
+              <div className="ft-chat-bubble model">Why did you use an array here?</div>
+              <div className="ft-chat-bubble user">To store results.</div>
+              <div className="ft-chat-bubble model">Is there a better structure?</div>
+            </div>
           </div>
-          <div>
-            <h2 className="ft-section-title">Start Study</h2>
-            <p className="ft-section-desc">Learning-focused modes that coach, guide, and teach you.</p>
+
+          <div className="ft-bn-card ft-bn-standard">
+            <div className="ft-bn-header">
+              <div className="ft-bn-icon" style={{ color: '#ff7b72', background: 'rgba(255, 123, 114, 0.1)' }}>
+                <LucideIcons.ShieldAlert size={20} />
+              </div>
+              <h3>Security Guardian</h3>
+            </div>
+            <p style={{fontSize: '0.85rem'}}>Scans for vulnerabilities like SQLi, XSS, and CSRF, patching them instantly.</p>
           </div>
-        </div>
-        <div className="ft-grid">
-          {STUDY_MODES.map((m) => (
-            <FeatureCard key={m.key} mode={m} />
-          ))}
+
+          <div className="ft-bn-card ft-bn-standard">
+            <div className="ft-bn-header">
+              <div className="ft-bn-icon" style={{ color: '#d29922', background: 'rgba(210, 153, 34, 0.1)' }}>
+                <LucideIcons.Timer size={20} />
+              </div>
+              <h3>Complexity Analysis</h3>
+            </div>
+            <p style={{fontSize: '0.85rem'}}>Parses Big-O time and space complexity with beautiful line-by-line explanations.</p>
+          </div>
+
+          {/* ROW 3 (4 blocks) */}
+          <div className="ft-bn-card ft-bn-wide">
+             <div className="ft-bn-bg-glow" style={{ background: '#22c55e' }} />
+            <div className="ft-bn-header">
+              <div className="ft-bn-icon" style={{ color: '#22c55e', background: 'rgba(34, 197, 94, 0.1)' }}>
+                <LucideIcons.ShieldCheck size={24} />
+              </div>
+              <h3>Interview Simulator</h3>
+            </div>
+            <p>Simulate FAANG interviews with a strict 45-minute timer and an AI Hiring Committee that grills you on algorithmic choices.</p>
+            <div className="ft-iv-mockup">
+               <div className="iv-mock-timer">45:00</div>
+               <div className="iv-mock-line"><span style={{width:'30%'}}></span></div>
+            </div>
+          </div>
+
+          <div className="ft-bn-card ft-bn-wide">
+            <div className="ft-bn-header">
+              <div className="ft-bn-icon" style={{ color: '#3fb950', background: 'rgba(63, 185, 80, 0.1)' }}>
+                <LucideIcons.BarChart3 size={24} />
+              </div>
+              <h3>DSA Learning Mode</h3>
+            </div>
+            <p>Never memorize algorithms again. This mode guides you through Data Structures from brute-force approaches to optimal O(N) solutions.</p>
+            <div className="ft-dsa-mockup">
+              <div className="dsa-bar" style={{height:'30%'}}></div>
+              <div className="dsa-bar" style={{height:'80%'}}></div>
+              <div className="dsa-bar" style={{height:'50%'}}></div>
+              <div className="dsa-bar" style={{height:'100%', background:'#3fb950'}}></div>
+            </div>
+          </div>
+
+          {/* ROW 4 & 5 (8 blocks) */}
+          
+          <div className="ft-bn-card ft-bn-large ft-bn-future">
+            <div className="ft-bn-bg-glow" style={{ background: '#f0883e' }} />
+            <div className="ft-bn-badge">Coming Q3 2026</div>
+            <div className="ft-bn-header">
+              <div className="ft-bn-icon" style={{ color: '#f0883e', background: 'rgba(240, 136, 62, 0.1)' }}>
+                <LucideIcons.Mic size={24} />
+              </div>
+              <h3>Voice Tutor & Visualizer</h3>
+            </div>
+            <p>Keyboard not required. Talk to Apollo naturally. It will listen to your logic, instantly visualize data structures based purely on your voice commands, and verbally coach you through complex problems using Text-to-Speech avatars.</p>
+            
+            <div className="ft-audio-wave large">
+              <span className="wave w1"/><span className="wave w2"/><span className="wave w3"/><span className="wave w4"/><span className="wave w5"/><span className="wave w1"/><span className="wave w3"/>
+            </div>
+          </div>
+
+          <div className="ft-bn-card ft-bn-tall">
+            <div className="ft-bn-bg-glow" style={{ background: '#f85149' }} />
+            <div className="ft-bn-header">
+              <div className="ft-bn-icon" style={{ color: '#f85149', background: 'rgba(248, 81, 73, 0.1)' }}>
+                <LucideIcons.Flame size={24} />
+              </div>
+              <h3>Roast My Code</h3>
+            </div>
+            <p>For when you need a little humility. Brutally honest, strictly humorous code critiques that rip your architecture to shreds while secretly making you a much better developer.</p>
+            <div className="ft-roast-flame">
+              <LucideIcons.Flame size={80} color="rgba(248, 81, 73, 0.15)" strokeWidth={1} />
+            </div>
+          </div>
+
+          <div className="ft-bn-card ft-bn-standard">
+            <div className="ft-bn-header">
+              <div className="ft-bn-icon" style={{ color: '#79c0ff', background: 'rgba(121, 192, 255, 0.1)' }}>
+                <LucideIcons.Target size={20} />
+              </div>
+              <h3>Zen Focus</h3>
+            </div>
+            <p style={{fontSize: '0.85rem'}}>Distraction-free environment with programmatic ambient Pink Noise.</p>
+          </div>
+
+          <div className="ft-bn-card ft-bn-standard">
+            <div className="ft-bn-header">
+              <div className="ft-bn-icon" style={{ color: '#f0883e', background: 'rgba(240, 136, 62, 0.1)' }}>
+                <LucideIcons.Lightbulb size={20} />
+              </div>
+              <h3>Hint Assistant</h3>
+            </div>
+            <p style={{fontSize: '0.85rem'}}>Refuses to give direct answers — provides progressive logic hints.</p>
+          </div>
+
         </div>
       </section>
 
@@ -231,7 +223,7 @@ function Features() {
 
       {/* Footer */}
       <footer className="ft-footer">
-        <span>Apollo · Built with React + Gemini AI</span>
+        <span>Apollo · Advanced Agentic Learning</span>
         <Link to="/">Back to Home</Link>
       </footer>
     </div>
