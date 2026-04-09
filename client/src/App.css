@@ -134,6 +134,11 @@ body {
 
 .ws-lang-select:hover { border-color: var(--ws-purple); }
 .ws-lang-select:focus { outline: none; border-color: var(--ws-purple); box-shadow: 0 0 0 2px var(--ws-purple-glow); }
+.ws-lang-select option {
+  background: #1a1a1a;
+  color: #ffffff;
+  padding: 0.3rem 0.5rem;
+}
 
 /* Active Mode Badge */
 .ws-active-mode-badge {
