@@ -1,11 +1,12 @@
-import { streamExplanation, streamComplexity, generateTestsAsJson, streamRoastCode, streamCodeReview, streamByMode } from '../services/aiService.js';
+import { streamExplanation, streamComplexity, generateTestsAsJson, streamRoastCode, streamCodeReview, streamByMode, streamChatByMode } from '../services/aiService.js';
 
 /**
  * POST /api/ai/chat
  * Generic streaming AI endpoint — accepts a `mode` key to select the AI persona.
+ * If `history` is provided, uses multi-turn chat (Type 2). Otherwise single-shot (Type 1).
  */
 export async function streamChat(req, res) {
-  const { code, language, mode } = req.body;
+  const { code, language, mode, history } = req.body;
 
   if (!code) {
     return res.status(400).json({ error: 'Code is required' });
@@ -16,7 +17,12 @@ export async function streamChat(req, res) {
   res.setHeader('Connection', 'keep-alive');
 
   try {
-    for await (const text of streamByMode(code, language, mode || 'explain')) {
+    // If history is provided, use multi-turn chat; otherwise single-shot analysis
+    const stream = (history && history.length > 0)
+      ? streamChatByMode(code, language, mode || 'explain', history)
+      : streamByMode(code, language, mode || 'explain');
+
+    for await (const text of stream) {
       res.write(`data: ${JSON.stringify({ text })}\n\n`);
     }
 

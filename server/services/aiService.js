@@ -1,9 +1,9 @@
 import ai from '../config/ai.js';
-import { buildPrompt } from './modeEngine.js';
+import { buildPrompt, buildChatContents } from './modeEngine.js';
 
 /**
  * Generic streaming function — uses the mode engine to pick the right system prompt.
- * This is the NEW unified endpoint all modes should use.
+ * Used for Type 1 (editor) modes — single-shot code analysis.
  */
 export async function* streamByMode(code, language, mode) {
   const prompt = buildPrompt(mode, code, language);
@@ -11,6 +11,23 @@ export async function* streamByMode(code, language, mode) {
   const responseStream = await ai.models.generateContentStream({
     model: 'gemini-2.5-flash',
     contents: prompt,
+  });
+
+  for await (const chunk of responseStream) {
+    yield chunk.text;
+  }
+}
+
+/**
+ * Chat streaming function with conversation history.
+ * Used for Type 2 (chat) modes — multi-turn conversations.
+ */
+export async function* streamChatByMode(code, language, mode, history) {
+  const contents = buildChatContents(mode, code, language, history);
+
+  const responseStream = await ai.models.generateContentStream({
+    model: 'gemini-2.5-flash',
+    contents: contents,
   });
 
   for await (const chunk of responseStream) {
