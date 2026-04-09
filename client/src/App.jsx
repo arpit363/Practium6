@@ -8,6 +8,8 @@ import WorkspaceChat from './pages/WorkspaceChat';
 import Features from './pages/Features';
 import Roast from './pages/Roast';
 import Review from './pages/Review';
+import Interview from './pages/Interview';
+import Focus from './pages/Focus';
 
 
 const ProtectedRoute = ({ children }) => {
@@ -30,7 +32,8 @@ function AppRoutes() {
         <Route path="/workspace/chat" element={<ProtectedRoute><WorkspaceChat /></ProtectedRoute>} />
         <Route path="/roast" element={<ProtectedRoute><Roast /></ProtectedRoute>} />
         <Route path="/code-review" element={<ProtectedRoute><Review /></ProtectedRoute>} />
-
+        <Route path="/interview" element={<ProtectedRoute><Interview /></ProtectedRoute>} />
+        <Route path="/focus" element={<ProtectedRoute><Focus /></ProtectedRoute>} />
       </Routes>
     </>
   );

@@ -234,6 +234,14 @@ function Workspace() {
               <LucideIcons.MessageSquare size={15} color="#666" />
               <span>AI Coaching Chat</span>
             </button>
+            <button className="ws-mode-item" onClick={() => navigate('/interview')}>
+              <LucideIcons.ShieldCheck size={15} color="#666" />
+              <span>Interview Prep</span>
+            </button>
+            <button className="ws-mode-item" onClick={() => navigate('/focus')}>
+              <LucideIcons.Target size={15} color="#666" />
+              <span>Focus Session</span>
+            </button>
             <button className="ws-mode-item" onClick={logout}>
               <LucideIcons.LogOut size={15} color="#666" />
               <span>Logout</span>

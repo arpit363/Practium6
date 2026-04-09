@@ -1,0 +1,128 @@
+.fz-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #0a0a0c;
+  overflow: hidden;
+  color: #a0a0a0;
+}
+
+.fz-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 2rem;
+}
+
+.fz-editor-container {
+  width: 100%;
+  max-width: 900px;
+  height: 85%;
+  background: #0f0f12;
+  border-radius: 12px;
+  border: 1px solid #1a1a1e;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+  transition: all 0.4s ease;
+}
+
+.fz-editor-container:focus-within {
+  transform: scale(1.01);
+  border-color: #25252a;
+}
+
+.fz-nav-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.fz-timer-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  border-radius: var(--ws-radius-pill);
+  border: 1px solid var(--ws-border);
+  background: var(--ws-surface);
+  color: var(--ws-text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.fz-timer-btn:hover { border-color: var(--ws-text-muted); }
+.fz-timer-btn.running {
+  border-color: var(--ws-purple);
+  color: var(--ws-purple-light);
+  background: rgba(155, 64, 224, 0.05);
+}
+
+.fz-reset-btn {
+  background: none;
+  border: none;
+  color: var(--ws-text-muted);
+  cursor: pointer;
+  padding: 0.4rem;
+  display: flex;
+  transition: 0.2s;
+}
+.fz-reset-btn:hover { color: var(--ws-text); transform: rotate(-90deg); }
+
+/* Floating Pill */
+.fz-floating-pill {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(15, 15, 18, 0.8);
+  backdrop-filter: blur(16px);
+  border: 1px solid #25252a;
+  border-radius: var(--ws-radius-pill);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  opacity: 0.4;
+  transition: opacity 0.3s;
+}
+
+.fz-floating-pill:hover {
+  opacity: 1;
+}
+
+.fz-sound-btn {
+  background: none;
+  border: none;
+  color: #666;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.fz-sound-btn:hover { color: #aaa; background: rgba(255,255,255,0.05); }
+.fz-sound-btn.active { color: var(--ws-purple-light); background: rgba(155, 64, 224, 0.1); }
+
+.fz-pill-divider {
+  width: 1px;
+  height: 20px;
+  background: #25252a;
+  margin: 0 0.5rem;
+}
+
+.fz-lang-select {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.72rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
