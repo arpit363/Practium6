@@ -757,3 +757,183 @@ body {
 .light-mode .output-stderr {
   color: var(--ws-red);
 }
+
+/* ══════════════════════════════════
+   RIGHT AI CHAT PANEL
+   ══════════════════════════════════ */
+.ws-chat {
+  display: flex;
+  flex-direction: column;
+  background: var(--ws-panel);
+  border-left: 1px solid var(--ws-border);
+  overflow: hidden;
+}
+
+.ws-chat-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--ws-border);
+  background: var(--ws-surface);
+  font-family: var(--ws-font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  backdrop-filter: blur(12px);
+}
+
+.ws-chat-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem 1rem;
+  font-size: 0.84rem;
+  line-height: 1.75;
+  color: var(--ws-text-secondary);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(155, 64, 224, 0.15) transparent;
+}
+.ws-chat-body::-webkit-scrollbar { width: 5px; }
+.ws-chat-body::-webkit-scrollbar-thumb {
+  background: rgba(155, 64, 224, 0.15);
+  border-radius: 10px;
+}
+
+/* ─── Empty State ─── */
+.ws-chat-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  padding: 2rem;
+  gap: 0.75rem;
+}
+
+.ws-chat-empty-icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: rgba(155, 64, 224, 0.06);
+  border: 1px solid rgba(155, 64, 224, 0.12);
+  animation: ws-chat-icon-float 3s ease-in-out infinite;
+}
+
+@keyframes ws-chat-icon-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+.ws-chat-empty p {
+  font-size: 0.78rem;
+  color: var(--ws-text-muted);
+  line-height: 1.6;
+  max-width: 220px;
+}
+.ws-chat-empty p strong {
+  color: var(--ws-text-secondary);
+}
+
+/* ─── Markdown Content Styling ─── */
+.ws-chat-body h1,
+.ws-chat-body h2,
+.ws-chat-body h3 {
+  color: var(--ws-text);
+  font-family: var(--ws-font-body);
+  margin-top: 1.2rem;
+  margin-bottom: 0.4rem;
+}
+.ws-chat-body h1 { font-size: 1.15rem; font-weight: 700; }
+.ws-chat-body h2 { font-size: 0.98rem; font-weight: 600; border-bottom: 1px solid var(--ws-border); padding-bottom: 0.3rem; }
+.ws-chat-body h3 { font-size: 0.88rem; font-weight: 600; }
+.ws-chat-body p { margin-bottom: 0.65rem; }
+.ws-chat-body strong { color: var(--ws-text); }
+.ws-chat-body em { color: var(--ws-text-secondary); font-style: italic; }
+.ws-chat-body ul, .ws-chat-body ol { padding-left: 1.4rem; margin-bottom: 0.65rem; }
+.ws-chat-body li { margin-bottom: 0.25rem; }
+.ws-chat-body li::marker { color: var(--ws-purple-light); }
+
+.ws-chat-body blockquote {
+  border-left: 3px solid var(--ws-purple);
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
+  background: rgba(155, 64, 224, 0.04);
+  border-radius: 0 var(--ws-radius-sm) var(--ws-radius-sm) 0;
+  color: var(--ws-text-secondary);
+  font-size: 0.82rem;
+}
+
+.ws-chat-body pre {
+  background: var(--ws-bg);
+  padding: 0.85rem 1rem;
+  border-radius: var(--ws-radius-sm);
+  overflow-x: auto;
+  border: 1px solid var(--ws-border);
+  margin: 0.65rem 0;
+  font-family: var(--ws-font-mono);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.ws-chat-body code {
+  font-family: var(--ws-font-mono);
+  font-size: 0.8em;
+  background: rgba(155, 64, 224, 0.1);
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  color: #c9a5f0;
+}
+
+.ws-chat-body pre code {
+  background: none;
+  padding: 0;
+  color: var(--ws-text-secondary);
+  font-size: 0.85rem;
+}
+
+.ws-chat-body hr {
+  border: none;
+  border-top: 1px solid var(--ws-border);
+  margin: 1rem 0;
+}
+
+.ws-chat-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.65rem 0;
+  font-size: 0.78rem;
+}
+
+.ws-chat-body th,
+.ws-chat-body td {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--ws-border);
+  text-align: left;
+}
+.ws-chat-body th {
+  background: var(--ws-surface);
+  font-weight: 600;
+  color: var(--ws-text);
+}
+
+/* ─── Light Mode Overrides ─── */
+.light-mode .ws-chat { background: var(--ws-panel); }
+.light-mode .ws-chat-header { background: var(--ws-surface); }
+.light-mode .ws-chat-body code {
+  background: rgba(123, 47, 190, 0.08);
+  color: #7B2FBE;
+}
+.light-mode .ws-chat-body pre {
+  background: var(--ws-surface);
+}
+.light-mode .ws-chat-body pre code {
+  background: none;
+  color: var(--ws-text-secondary);
+}
+.light-mode .ws-chat-body blockquote {
+  background: rgba(123, 47, 190, 0.03);
+}

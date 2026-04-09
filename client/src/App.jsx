@@ -4,15 +4,15 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import LandingV2 from './pages/LandingV2';
 import Auth from './pages/Auth';
 import Workspace from './pages/Workspace';
+import WorkspaceChat from './pages/WorkspaceChat';
 import Features from './pages/Features';
 import Roast from './pages/Roast';
 import Review from './pages/Review';
 
+
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
-  if (!user) {
-    return <Navigate to="/auth" />;
-  }
+  if (!user) return <Navigate to="/auth" />;
   return children;
 };
 
@@ -25,30 +25,12 @@ function AppRoutes() {
         <Route path="/" element={<LandingV2 />} />
         <Route path="/features" element={<Features />} />
         <Route path="/auth" element={user ? <Navigate to="/workspace" /> : <Auth />} />
-        <Route
-          path="/workspace"
-          element={
-            <ProtectedRoute>
-              <Workspace />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/roast"
-          element={
-            <ProtectedRoute>
-              <Roast />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/code-review"
-          element={
-            <ProtectedRoute>
-              <Review />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/dashboard" element={<Navigate to="/workspace" />} />
+        <Route path="/workspace" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
+        <Route path="/workspace/chat" element={<ProtectedRoute><WorkspaceChat /></ProtectedRoute>} />
+        <Route path="/roast" element={<ProtectedRoute><Roast /></ProtectedRoute>} />
+        <Route path="/code-review" element={<ProtectedRoute><Review /></ProtectedRoute>} />
+
       </Routes>
     </>
   );
