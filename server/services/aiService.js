@@ -1,5 +1,7 @@
-import ai from '../config/ai.js';
+import openai from '../config/ai.js';
 import { buildPrompt, buildChatContents } from './modeEngine.js';
+
+const MODEL = 'gpt-4o-mini';
 
 /**
  * Generic streaming function — uses the mode engine to pick the right system prompt.
@@ -8,32 +10,35 @@ import { buildPrompt, buildChatContents } from './modeEngine.js';
 export async function* streamByMode(code, language, mode, history = []) {
   const prompt = buildPrompt(mode, code, language);
 
-  let formattedContents = [];
+  let messages = [];
 
   if (history && history.length > 0) {
-    formattedContents = history.map((msg, idx) => {
+    messages = history.map((msg, idx) => {
       if (idx === 0 && msg.role === 'user') {
         return {
           role: 'user',
-          parts: [{ text: `${prompt}\n\nUser Request: ${msg.content}` }]
+          content: `${prompt}\n\nUser Request: ${msg.content}`
         };
       }
       return {
-        role: msg.role === 'model' ? 'model' : 'user',
-        parts: [{ text: msg.content }]
+        role: msg.role === 'model' ? 'assistant' : 'user',
+        content: msg.content
       };
     });
   } else {
-    formattedContents = [{ role: 'user', parts: [{ text: prompt }] }];
+    messages = [{ role: 'user', content: prompt }];
   }
 
-  const responseStream = await ai.models.generateContentStream({
-    model: 'gemini-2.5-flash',
-    contents: formattedContents,
+  const responseStream = await openai.chat.completions.create({
+    model: MODEL,
+    messages: messages,
+    stream: true,
+    max_completion_tokens: 8000,
   });
 
   for await (const chunk of responseStream) {
-    yield chunk.text;
+    const text = chunk.choices[0]?.delta?.content || '';
+    if (text) yield text;
   }
 }
 
@@ -42,15 +47,18 @@ export async function* streamByMode(code, language, mode, history = []) {
  * Used for Type 2 (chat) modes — multi-turn conversations.
  */
 export async function* streamChatByMode(code, language, mode, history) {
-  const contents = buildChatContents(mode, code, language, history);
+  const messages = buildChatContents(mode, code, language, history);
 
-  const responseStream = await ai.models.generateContentStream({
-    model: 'gemini-2.5-flash',
-    contents: contents,
+  const responseStream = await openai.chat.completions.create({
+    model: MODEL,
+    messages: messages,
+    stream: true,
+    max_completion_tokens: 8000,
   });
 
   for await (const chunk of responseStream) {
-    yield chunk.text;
+    const text = chunk.choices[0]?.delta?.content || '';
+    if (text) yield text;
   }
 }
 
@@ -71,13 +79,15 @@ export async function* streamRoastCode(code, language) {
     \`\`\`
   `;
 
-  const responseStream = await ai.models.generateContentStream({
-    model: 'gemini-2.5-flash',
-    contents: prompt,
+  const responseStream = await openai.chat.completions.create({
+    model: MODEL,
+    messages: [{ role: 'user', content: prompt }],
+    stream: true,
   });
 
   for await (const chunk of responseStream) {
-    yield chunk.text;
+    const text = chunk.choices[0]?.delta?.content || '';
+    if (text) yield text;
   }
 }
 
@@ -97,20 +107,21 @@ export async function* streamCodeReview(code, language) {
     \`\`\`
   `;
 
-  const responseStream = await ai.models.generateContentStream({
-    model: 'gemini-2.5-flash',
-    contents: prompt,
+  const responseStream = await openai.chat.completions.create({
+    model: MODEL,
+    messages: [{ role: 'user', content: prompt }],
+    stream: true,
   });
 
   for await (const chunk of responseStream) {
-    yield chunk.text;
+    const text = chunk.choices[0]?.delta?.content || '';
+    if (text) yield text;
   }
 }
 
 
 /**
  * Streams an AI explanation of the given code.
- * Yields text chunks as they arrive from Gemini.
  */
 export async function* streamExplanation(code, language) {
   const prompt = `
@@ -125,19 +136,20 @@ export async function* streamExplanation(code, language) {
     \`\`\`
   `;
 
-  const responseStream = await ai.models.generateContentStream({
-    model: 'gemini-2.5-flash',
-    contents: prompt,
+  const responseStream = await openai.chat.completions.create({
+    model: MODEL,
+    messages: [{ role: 'user', content: prompt }],
+    stream: true,
   });
 
   for await (const chunk of responseStream) {
-    yield chunk.text;
+    const text = chunk.choices[0]?.delta?.content || '';
+    if (text) yield text;
   }
 }
 
 /**
  * Streams an AI time and space complexity analysis of the given code.
- * Yields text chunks as they arrive from Gemini.
  */
 export async function* streamComplexity(code, language) {
   const prompt = `
@@ -152,13 +164,15 @@ export async function* streamComplexity(code, language) {
     \`\`\`
   `;
 
-  const responseStream = await ai.models.generateContentStream({
-    model: 'gemini-2.5-flash',
-    contents: prompt,
+  const responseStream = await openai.chat.completions.create({
+    model: MODEL,
+    messages: [{ role: 'user', content: prompt }],
+    stream: true,
   });
 
   for await (const chunk of responseStream) {
-    yield chunk.text;
+    const text = chunk.choices[0]?.delta?.content || '';
+    if (text) yield text;
   }
 }
 
@@ -169,9 +183,9 @@ export async function* streamComplexity(code, language) {
 export async function generateTestsAsJson(code, language) {
   const prompt = `
     You are Apollo, an expert QA engineer and coding tutor.
-    Analyze the following ${language || 'programming'} code and return a JSON array containing exactly 3 test cases.
+    Analyze the following ${language || 'programming'} code and return a JSON object with a single key "tests" containing an array of exactly 3 test cases.
     
-    Each object must have:
+    Each object in the "tests" array must have:
     - "inputs": A string describing the inputs visually (e.g. "a = 1, b = 2")
     - "expectedOutput": A string of the EXACT expected printed output without quotes.
     - "fullExecutableCode": A complete, runnable source code file as a single string. It MUST include all standard imports/includes (e.g., #include <iostream>, import java.util.*), the user's FULL original code block intact, and the main driver loop (e.g., int main(), public static void main) that calls the function with the test case arguments and prints the expected output. This allows the backend to securely natively compile the string as a complete program snippet.
@@ -182,16 +196,21 @@ export async function generateTestsAsJson(code, language) {
     \`\`\`
   `;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: prompt,
-    generationConfig: {
-      responseMimeType: "application/json"
-    }
+  const response = await openai.chat.completions.create({
+    model: MODEL,
+    messages: [{ role: 'system', content: prompt }],
+    response_format: { type: "json_object" }
   });
 
-  let rawText = response.text || '';
-  rawText = rawText.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
-
-  return JSON.parse(rawText);
+  let rawText = response.choices[0]?.message?.content || '{}';
+  
+  try {
+     const parsed = JSON.parse(rawText);
+     if (parsed.tests && Array.isArray(parsed.tests)) {
+        return parsed.tests;
+     }
+     return [];
+  } catch(e) {
+     return [];
+  }
 }

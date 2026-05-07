@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
 import CodeEditor from '../components/CodeEditor/CodeEditor';
 import OutputPanel from '../components/OutputPanel/OutputPanel';
+import CodeVisualizer from '../components/Visualizer/CodeVisualizer';
 import { streamAIChat, fetchGeneratedTests, runCode } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { EDITOR_MODES } from '../modes/modeConfig';
@@ -104,8 +105,72 @@ function Workspace() {
       code, language,
       mode: activeMode.key,
       history: [],
-      onChunk: (text) => setAiResponse((prev) => prev + text),
-      onError: () => setAiResponse('Error: Could not generate response.'),
+      onChunk: (text) => {
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastIndex = newMessages.length - 1;
+          const lastMsg = newMessages[lastIndex] || { role: 'model', content: '' };
+          newMessages[lastIndex] = {
+            ...lastMsg,
+            content: (lastMsg.content || '') + text
+          };
+          return newMessages;
+        });
+      },
+      onError: () => {
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastIndex = newMessages.length - 1;
+          newMessages[lastIndex] = {
+            ...newMessages[lastIndex],
+            content: newMessages[lastIndex].content + '\n\n**Error: Could not generate response.**'
+          };
+          return newMessages;
+        });
+      },
+    });
+    setLoading(false);
+  };
+
+  const handleSendMessage = async () => {
+    if (!chatInput.trim() || loading) return;
+    const input = chatInput;
+    setChatInput('');
+    setLoading(true);
+    
+    setMessages(prev => [
+      ...prev,
+      { role: 'user', content: input },
+      { role: 'model', content: '' }
+    ]);
+
+    await streamAIChat({
+      code, language,
+      mode: activeMode.key,
+      history: messages.concat([{ role: 'user', content: input }]),
+      onChunk: (text) => {
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastIndex = newMessages.length - 1;
+          const lastMsg = newMessages[lastIndex] || { role: 'model', content: '' };
+          newMessages[lastIndex] = {
+            ...lastMsg,
+            content: (lastMsg.content || '') + text
+          };
+          return newMessages;
+        });
+      },
+      onError: () => {
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastIndex = newMessages.length - 1;
+          newMessages[lastIndex] = {
+            ...newMessages[lastIndex],
+            content: newMessages[lastIndex].content + '\n\n**Error: Could not generate response.**'
+          };
+          return newMessages;
+        });
+      },
     });
     setLoading(false);
   };
@@ -267,9 +332,16 @@ function Workspace() {
 
         <div className="ws-resize-handle" onMouseDown={(e) => handleMouseDown('sidebar', e)} />
 
-        {/* CENTER EDITOR */}
         <main className="ws-main">
-          <div className="ws-editor-area">
+          {activeMode.key === 'visualizer' && messages.length > 0 ? (
+             <div style={{ flex: 1, width: '100%', height: '100%', overflow: 'hidden' }}>
+               <CodeVisualizer 
+                 content={messages[messages.length - 1]?.role === 'model' ? messages[messages.length - 1].content : ''} 
+                 isGenerating={loading} 
+               />
+             </div>
+          ) : (
+            <div className="ws-editor-area">
             <div className="ws-editor-panel">
               <div className="ws-editor-wrapper" style={{ borderBottom: testCases.length > 0 ? '1px solid var(--ws-border)' : 'none' }}>
                 <CodeEditor language={language} value={code} onChange={setCode} theme={darkMode ? 'vs-dark' : 'light'} />
@@ -309,6 +381,7 @@ function Workspace() {
               <OutputPanel output={output} running={running} onClose={() => setOutputOpen(false)} stdin={stdin} onStdinChange={setStdin} />
             )}
           </div>
+          )}
         </main>
 
         <div className="ws-resize-handle" onMouseDown={(e) => handleMouseDown('chat', e)} />
@@ -328,12 +401,17 @@ function Workspace() {
                      background: msg.role === 'user' ? (darkMode ? '#323842' : '#e1e4e8') : 'transparent',
                      padding: msg.role === 'user' ? '10px 14px' : '0',
                      borderRadius: msg.role === 'user' ? '12px 12px 0 12px' : '0',
-                     maxWidth: '90%',
+                     maxWidth: (activeMode.key === 'visualizer' && msg.role === 'model') ? '100%' : '90%',
+                     width: (activeMode.key === 'visualizer' && msg.role === 'model') ? '100%' : 'auto',
                      overflowX: 'auto',
                      fontSize: '0.92rem',
                      wordBreak: 'break-word'
                    }}>
-                     {msg.role === 'model' ? <ReactMarkdown>{msg.content}</ReactMarkdown> : <span style={{ color: darkMode ? '#c9d1d9' : '#24292f' }}>{msg.content}</span>}
+                     {msg.role === 'model' ? (
+                         <ReactMarkdown>{msg.content.replace(/```json[\s\S]*?```/g, '*[Visualization generated in main panel]*')}</ReactMarkdown>
+                     ) : (
+                       <span style={{ color: darkMode ? '#c9d1d9' : '#24292f' }}>{msg.content}</span>
+                     )}
                    </div>
                 ))}
               </div>
