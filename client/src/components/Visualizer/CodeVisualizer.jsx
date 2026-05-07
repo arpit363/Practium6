@@ -98,7 +98,7 @@ const CodeVisualizer = ({ content, isGenerating }) => {
         const parsed = JSON.parse(jsonMatch[1]);
         
         if (parsed.steps && Array.isArray(parsed.steps) && parsed.steps.length > 0) {
-          setSteps(parsed.steps);
+          setSteps(parsed.steps); // eslint-disable-line react-hooks/set-state-in-effect
           setParseError(null);
         } else if (parsed.nodes && parsed.edges) {
           setSteps([{
@@ -108,7 +108,7 @@ const CodeVisualizer = ({ content, isGenerating }) => {
           }]);
           setParseError(null);
         }
-      } catch (err) {
+      } catch {
         if (!isGenerating) {
           setParseError('Failed to parse visualization data. Please try generating again.');
         }

@@ -206,11 +206,8 @@ export async function generateTestsAsJson(code, language) {
   
   try {
      const parsed = JSON.parse(rawText);
-     if (parsed.tests && Array.isArray(parsed.tests)) {
-        return parsed.tests;
-     }
-     return [];
-  } catch(e) {
+     return parsed.tests || [];
+  } catch {
      return [];
   }
 }

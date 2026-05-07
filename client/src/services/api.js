@@ -41,7 +41,7 @@ export async function streamAIChat({ code, language, mode, history, onChunk, onD
               try {
                 const dataObj = JSON.parse(dataStr);
                 onChunk(dataObj.text);
-              } catch (e) {
+              } catch {
                 console.error('Error parsing stream chunk', dataStr);
               }
             }
@@ -98,7 +98,7 @@ export async function streamExplainCode({ code, language, onChunk, onDone, onErr
               try {
                 const dataObj = JSON.parse(dataStr);
                 onChunk(dataObj.text);
-              } catch (e) {
+              } catch {
                 console.error('Error parsing stream chunk', dataStr);
               }
             }
@@ -155,7 +155,7 @@ export async function streamAnalyzeComplexity({ code, language, onChunk, onDone,
               try {
                 const dataObj = JSON.parse(dataStr);
                 onChunk(dataObj.text);
-              } catch (e) {
+              } catch {
                 console.error('Error parsing stream chunk', dataStr);
               }
             }
@@ -287,7 +287,7 @@ export async function streamRoastCode({ code, language, onChunk, onDone, onError
               try {
                 const dataObj = JSON.parse(dataStr);
                 onChunk(dataObj.text);
-              } catch (e) {
+              } catch {
                 console.error('Error parsing stream chunk', dataStr);
               }
             }
@@ -343,7 +343,7 @@ export async function streamReviewCode({ code, language, onChunk, onDone, onErro
               try {
                 const dataObj = JSON.parse(dataStr);
                 onChunk(dataObj.text);
-              } catch (e) {
+              } catch {
                 console.error('Error parsing stream chunk', dataStr);
               }
             }
