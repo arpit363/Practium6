@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
-import { GoogleGenAI } from '@google/genai';
+import Groq from 'groq-sdk';
 
 dotenv.config();
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const ai = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export default ai;
