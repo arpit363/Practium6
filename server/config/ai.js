@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
-import Groq from 'groq-sdk';
+import { OpenAI } from 'openai';
 
 dotenv.config();
 
-const ai = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const ai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export default ai;

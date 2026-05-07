@@ -109,9 +109,10 @@ function Workspace() {
         setMessages(prev => {
           const newMessages = [...prev];
           const lastIndex = newMessages.length - 1;
+          const lastMsg = newMessages[lastIndex] || { role: 'model', content: '' };
           newMessages[lastIndex] = {
-            ...newMessages[lastIndex],
-            content: newMessages[lastIndex].content + text
+            ...lastMsg,
+            content: (lastMsg.content || '') + text
           };
           return newMessages;
         });
@@ -151,9 +152,10 @@ function Workspace() {
         setMessages(prev => {
           const newMessages = [...prev];
           const lastIndex = newMessages.length - 1;
+          const lastMsg = newMessages[lastIndex] || { role: 'model', content: '' };
           newMessages[lastIndex] = {
-            ...newMessages[lastIndex],
-            content: newMessages[lastIndex].content + text
+            ...lastMsg,
+            content: (lastMsg.content || '') + text
           };
           return newMessages;
         });

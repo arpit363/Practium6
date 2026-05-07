@@ -1,7 +1,7 @@
-import groq from '../config/ai.js';
+import openai from '../config/ai.js';
 import { buildPrompt, buildChatContents } from './modeEngine.js';
 
-const MODEL = 'llama-3.3-70b-versatile';
+const MODEL = 'gpt-4o-mini';
 
 /**
  * Generic streaming function — uses the mode engine to pick the right system prompt.
@@ -29,7 +29,7 @@ export async function* streamByMode(code, language, mode, history = []) {
     messages = [{ role: 'user', content: prompt }];
   }
 
-  const responseStream = await groq.chat.completions.create({
+  const responseStream = await openai.chat.completions.create({
     model: MODEL,
     messages: messages,
     stream: true,
@@ -49,7 +49,7 @@ export async function* streamByMode(code, language, mode, history = []) {
 export async function* streamChatByMode(code, language, mode, history) {
   const messages = buildChatContents(mode, code, language, history);
 
-  const responseStream = await groq.chat.completions.create({
+  const responseStream = await openai.chat.completions.create({
     model: MODEL,
     messages: messages,
     stream: true,
@@ -79,7 +79,7 @@ export async function* streamRoastCode(code, language) {
     \`\`\`
   `;
 
-  const responseStream = await groq.chat.completions.create({
+  const responseStream = await openai.chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
     stream: true,
@@ -107,7 +107,7 @@ export async function* streamCodeReview(code, language) {
     \`\`\`
   `;
 
-  const responseStream = await groq.chat.completions.create({
+  const responseStream = await openai.chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
     stream: true,
@@ -136,7 +136,7 @@ export async function* streamExplanation(code, language) {
     \`\`\`
   `;
 
-  const responseStream = await groq.chat.completions.create({
+  const responseStream = await openai.chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
     stream: true,
@@ -164,7 +164,7 @@ export async function* streamComplexity(code, language) {
     \`\`\`
   `;
 
-  const responseStream = await groq.chat.completions.create({
+  const responseStream = await openai.chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: prompt }],
     stream: true,
@@ -196,7 +196,7 @@ export async function generateTestsAsJson(code, language) {
     \`\`\`
   `;
 
-  const response = await groq.chat.completions.create({
+  const response = await openai.chat.completions.create({
     model: MODEL,
     messages: [{ role: 'system', content: prompt }],
     response_format: { type: "json_object" }
