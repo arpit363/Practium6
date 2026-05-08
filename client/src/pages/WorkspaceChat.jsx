@@ -23,6 +23,9 @@ function WorkspaceChat() {
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState('javascript');
   const [codeOpen, setCodeOpen] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef(null);
+
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('apollo-theme');
     return saved ? saved === 'dark' : true;
@@ -81,6 +84,68 @@ function WorkspaceChat() {
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+  };
+
+  const handleStartRecording = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Your browser does not support voice typing. Please use Chrome or Edge.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+    };
+
+    let finalTranscript = chatInput; // Keep whatever was already typed
+
+    recognition.onresult = (event) => {
+      let interimTranscript = '';
+      let currentFinal = '';
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          currentFinal += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+
+      if (currentFinal) {
+        finalTranscript += (finalTranscript ? ' ' : '') + currentFinal;
+        setChatInput(finalTranscript);
+      } else if (interimTranscript) {
+        // Show interim results while they speak
+        setChatInput(finalTranscript + (finalTranscript ? ' ' : '') + interimTranscript);
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      if (event.error === 'not-allowed') {
+        alert("Please allow microphone access to use voice typing.");
+      }
+      setIsRecording(false);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const handleStopRecording = () => {
+    if (recognitionRef.current && isRecording) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    }
   };
 
   return (
@@ -246,9 +311,28 @@ function WorkspaceChat() {
               <LucideIcons.ChevronUp size={10} style={{ transform: codeOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.2s' }} />
             </button>
             <div className="wsc-input-wrapper">
-              <input ref={inputRef} type="text" className="wsc-input" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={handleKeyDown} placeholder={`Ask ${activeMode.label}...`} disabled={loading} />
+              <input 
+                ref={inputRef} 
+                type="text" 
+                className="wsc-input" 
+                value={chatInput} 
+                onChange={(e) => setChatInput(e.target.value)} 
+                onKeyDown={handleKeyDown} 
+                placeholder={isRecording ? 'Listening...' : `Ask ${activeMode.label}...`} 
+                disabled={loading} 
+              />
             </div>
-            <button className="wsc-send-btn" onClick={handleSend} disabled={loading || !chatInput.trim()}>
+            
+            <button 
+              className={`wsc-mic-btn ${isRecording ? 'recording' : ''}`} 
+              onClick={isRecording ? handleStopRecording : handleStartRecording}
+              disabled={loading}
+              title={isRecording ? "Stop recording" : "Use Voice Typing"}
+            >
+              {isRecording ? <LucideIcons.Square size={16} color="#ef4444" fill="#ef4444" /> : <LucideIcons.Mic size={16} />}
+            </button>
+
+            <button className="wsc-send-btn" onClick={handleSend} disabled={loading || (!chatInput.trim() && !isRecording)}>
               <LucideIcons.Send size={16} />
             </button>
           </div>

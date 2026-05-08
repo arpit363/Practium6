@@ -22,6 +22,8 @@ function Workspace() {
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef(null);
   const [activeMode, setActiveMode] = useState(EDITOR_MODES[0]);
   const [testCases, setTestCases] = useState([]);
   const [loadingTests, setLoadingTests] = useState(false);
@@ -173,6 +175,68 @@ function Workspace() {
       },
     });
     setLoading(false);
+  };
+
+  const handleStartRecording = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Your browser does not support voice typing. Please use Chrome or Edge.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+    };
+
+    let finalTranscript = chatInput; // Keep whatever was already typed
+
+    recognition.onresult = (event) => {
+      let interimTranscript = '';
+      let currentFinal = '';
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          currentFinal += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+
+      if (currentFinal) {
+        finalTranscript += (finalTranscript ? ' ' : '') + currentFinal;
+        setChatInput(finalTranscript);
+      } else if (interimTranscript) {
+        // Show interim results while they speak
+        setChatInput(finalTranscript + (finalTranscript ? ' ' : '') + interimTranscript);
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      if (event.error === 'not-allowed') {
+        alert("Please allow microphone access to use voice typing.");
+      }
+      setIsRecording(false);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const handleStopRecording = () => {
+    if (recognitionRef.current && isRecording) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    }
   };
 
   const handleGenerateTests = async () => {
@@ -431,13 +495,22 @@ function Workspace() {
                 value={chatInput} 
                 onChange={(e) => setChatInput(e.target.value)} 
                 onKeyDown={(e) => { if (e.key === 'Enter') handleSendMessage(); }}
-                placeholder="Ask a follow-up question..." 
+                placeholder={isRecording ? 'Listening...' : "Ask a follow-up question..."} 
                 disabled={loading}
                 style={{ flex: 1, background: darkMode ? '#0d1117' : '#f6f8fa', color: darkMode ? '#c9d1d9' : '#24292f', border: '1px solid var(--ws-border)', padding: '10px 14px', borderRadius: '6px', outline: 'none' }}
               />
               <button 
+                onClick={isRecording ? handleStopRecording : handleStartRecording} 
+                disabled={loading} 
+                className="ws-btn"
+                style={{ padding: '8px 12px', borderRadius: '6px', background: isRecording ? 'rgba(239, 68, 68, 0.1)' : 'var(--ws-bg-secondary)', border: isRecording ? '1px solid #ef4444' : '1px solid var(--ws-border)', color: isRecording ? '#ef4444' : 'var(--ws-text-muted)', animation: isRecording ? 'pulse-red 1.5s infinite' : 'none' }}
+                title={isRecording ? "Stop recording" : "Use Voice Typing"}
+              >
+                {isRecording ? <LucideIcons.Square size={15} color="#ef4444" fill="#ef4444" /> : <LucideIcons.Mic size={15} />}
+              </button>
+              <button 
                 onClick={handleSendMessage} 
-                disabled={loading || !chatInput.trim()} 
+                disabled={loading || (!chatInput.trim() && !isRecording)} 
                 className="ws-btn ws-btn-run"
                 style={{ padding: '8px 12px', borderRadius: '6px' }}
               >

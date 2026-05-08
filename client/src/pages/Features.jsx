@@ -155,16 +155,16 @@ function Features() {
 
           {/* ROW 4 & 5 (8 blocks) */}
           
-          <div className="ft-bn-card ft-bn-large ft-bn-future">
+          <div className="ft-bn-card ft-bn-large">
             <div className="ft-bn-bg-glow" style={{ background: '#f0883e' }} />
-            <div className="ft-bn-badge">Coming Q3 2026</div>
+            <div className="ft-bn-badge" style={{ background: 'rgba(34, 197, 94, 0.15)', color: '#4ade80', border: '1px solid rgba(34, 197, 94, 0.3)' }}>Now Live!</div>
             <div className="ft-bn-header">
               <div className="ft-bn-icon" style={{ color: '#f0883e', background: 'rgba(240, 136, 62, 0.1)' }}>
                 <LucideIcons.Mic size={24} />
               </div>
-              <h3>Voice Tutor & Visualizer</h3>
+              <h3>Voice Dictation & Visualizer</h3>
             </div>
-            <p>Keyboard not required. Talk to Apollo naturally. It will listen to your logic, instantly visualize data structures based purely on your voice commands, and verbally coach you through complex problems using Text-to-Speech avatars.</p>
+            <p>Keyboard not required. Talk to Apollo naturally with built-in native Web Speech API integration. It transcribes your logic in real-time and instantly visualizes your data structures step-by-step.</p>
             
             <div className="ft-audio-wave large">
               <span className="wave w1"/><span className="wave w2"/><span className="wave w3"/><span className="wave w4"/><span className="wave w5"/><span className="wave w1"/><span className="wave w3"/>

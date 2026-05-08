@@ -10,7 +10,7 @@ import Roast from './pages/Roast';
 import Review from './pages/Review';
 import Interview from './pages/Interview';
 import Focus from './pages/Focus';
-
+import Profile from './pages/Profile';
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
@@ -34,6 +34,7 @@ function AppRoutes() {
         <Route path="/code-review" element={<ProtectedRoute><Review /></ProtectedRoute>} />
         <Route path="/interview" element={<ProtectedRoute><Interview /></ProtectedRoute>} />
         <Route path="/focus" element={<ProtectedRoute><Focus /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       </Routes>
     </>
   );

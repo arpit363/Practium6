@@ -1099,7 +1099,7 @@ const SECTION_TITLES = {
 
 export default function Profile() {
   const { user, login, logout, token } = useAuth();
-  const { settings, updateSetting, updateMultiple } = useSettings();
+  const { settings, updateSetting } = useSettings();
   const savedData = useSavedData();
   const [activeSection, setActiveSection] = useState('profile');
 
@@ -1109,7 +1109,7 @@ export default function Profile() {
   const sectionInfo = SECTION_TITLES[activeSection] || SECTION_TITLES.profile;
 
   // Save profile updates to AuthContext
-  const handleSaveProfile = ({ displayName, username, email }) => {
+  const handleSaveProfile = ({ displayName, email }) => {
     const updatedUser = { ...user, username: displayName, email };
     login(updatedUser, token);
   };
