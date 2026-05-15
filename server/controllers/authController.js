@@ -9,6 +9,7 @@ const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
   secure: false, // true for 465, false for other ports
+  family: 4, // Force IPv4 routing (Render free tier does not support IPv6)
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
