@@ -1,4 +1,7 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Automatically use Render backend in production, localhost in development
+const API_BASE = import.meta.env.MODE === 'production' 
+  ? 'https://practium6.onrender.com' 
+  : 'http://localhost:5000';
 
 /**
  * Generic SSE streaming function — sends code + mode to the unified /api/ai/chat endpoint.
